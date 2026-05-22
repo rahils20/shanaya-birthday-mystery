@@ -37,7 +37,6 @@ game_html = f"""
     #game-container {{ position: relative; width: 900px; height: 600px; border: 4px solid #333; border-radius: 12px; box-shadow: 0px 10px 30px rgba(0,0,0,0.8); overflow: hidden; background: #2d4a22; }}
     canvas {{ display: block; }}
     
-    /* UI Overlays */
     #dialogue-box {{
         display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
         background: #1e1e24; border: 3px solid #fdd835; border-radius: 12px; padding: 25px;
@@ -85,88 +84,79 @@ game_html = f"""
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    // --- MASSIVE MAP DIMENSIONS ---
     const MAP_W = 2000;
     const MAP_H = 2000;
 
-    // --- GAME STATE ---
-    const player = {{ x: 1000, y: 1500, w: 30, h: 40, speed: 6, avatar: "🕵️‍♀️" }};
+    // Start player completely outside
+    const player = {{ x: 1000, y: 1400, w: 30, h: 40, speed: 6, avatar: "🕵️‍♀️" }};
     const keys = {{}};
     let modalOpen = false; let padOpen = false;
 
-    // --- WORLD BUILDING (AABB Collision) ---
-    // Instead of lines, we use solid blocks
+    // --- SOLID WALLS (AABB Collision) ---
     const walls = [];
     const furniture = [];
     
-    // Mansion Walls
-    const mansion = {{ x: 500, y: 400, w: 1000, h: 800 }};
-    
-    // Create physical walls around the mansion (with a gap for the front door and back door)
-    walls.push({{x: 500, y: 400, w: 1000, h: 20}}); // Top wall
+    // Outer Mansion Walls
+    walls.push({{x: 500, y: 400, w: 1000, h: 20}}); // Top
     walls.push({{x: 500, y: 1180, w: 450, h: 20}}); // Bottom left
-    walls.push({{x: 1050, y: 1180, w: 450, h: 20}}); // Bottom right (Door is at 950-1050)
-    walls.push({{x: 500, y: 400, w: 20, h: 800}}); // Left wall
-    walls.push({{x: 1480, y: 400, w: 20, h: 800}}); // Right wall
+    walls.push({{x: 1050, y: 1180, w: 450, h: 20}}); // Bottom right (Front Door Gap at 950-1050)
+    walls.push({{x: 500, y: 400, w: 20, h: 800}}); // Left
+    walls.push({{x: 1480, y: 400, w: 20, h: 800}}); // Right
 
-    // Internal Walls
-    walls.push({{x: 800, y: 400, w: 20, h: 350}}); // Kitchen Right wall
-    walls.push({{x: 500, y: 750, w: 200, h: 20}}); // Kitchen Bottom wall (door gap)
+    // Kitchen Walls (Top Left)
+    walls.push({{x: 830, y: 400, w: 20, h: 350}}); // Kitchen Right Wall
+    walls.push({{x: 500, y: 730, w: 220, h: 20}}); // Kitchen Bottom Wall (Door gap at 720-830)
     
-    walls.push({{x: 1150, y: 400, w: 20, h: 350}}); // Library Left wall
-    walls.push({{x: 1250, y: 750, w: 250, h: 20}}); // Library Bottom wall
+    // Library Walls (Top Right)
+    walls.push({{x: 1150, y: 400, w: 20, h: 350}}); // Library Left Wall
+    walls.push({{x: 1280, y: 730, w: 220, h: 20}}); // Library Bottom Wall (Door gap at 1170-1280)
 
-    walls.push({{x: 800, y: 850, w: 20, h: 350}}); // Study Right wall
-    walls.push({{x: 500, y: 850, w: 200, h: 20}}); // Study Top wall
+    // Study Walls (Bottom Left)
+    walls.push({{x: 830, y: 850, w: 20, h: 350}}); // Study Right Wall
+    walls.push({{x: 500, y: 850, w: 220, h: 20}}); // Study Top Wall (Door gap at 720-830)
 
-    // Add Furniture (Solid objects with Emoji Sprites)
-    function addProp(x, y, w, h, emoji, size) {{
-        furniture.push({{x, y, w, h, emoji, size}});
-    }}
-    // Kitchen
-    addProp(550, 450, 60, 60, "🧊", 50); // Fridge
-    addProp(650, 550, 100, 60, "🍳", 50); // Stove/Island
-    addProp(550, 650, 80, 80, "🪑", 40); // Dining table
+    // Furniture Props (Solid objects)
+    function addProp(x, y, w, h, emoji, size) {{ furniture.push({{x, y, w, h, emoji, size}}); }}
+    
+    addProp(550, 450, 60, 60, "🧊", 50); // Kitchen Fridge
+    addProp(700, 550, 100, 60, "🍳", 50); // Kitchen Stove
+    addProp(550, 600, 80, 80, "🪑", 40); // Kitchen Table
 
-    // Library
-    addProp(1200, 450, 200, 40, "📚", 40); // Bookshelves
+    addProp(1200, 450, 200, 40, "📚", 40); // Library Shelves
     addProp(1200, 500, 200, 40, "📚", 40); 
-    addProp(1300, 650, 60, 60, "🛋️", 50); // Couch
+    addProp(1300, 650, 60, 60, "🛋️", 50); // Library Couch
 
-    // Study
-    addProp(550, 900, 100, 60, "💻", 50); // Desk
-    addProp(600, 1000, 40, 40, "🪴", 40); // Plant
+    addProp(550, 950, 100, 60, "💻", 50); // Study Desk
+    addProp(600, 1050, 40, 40, "🪴", 40); // Study Plant
 
-    // Grand Hall
-    addProp(950, 600, 100, 150, "🎹", 80); // Piano
+    addProp(950, 500, 100, 150, "🎹", 80); // Grand Hall Piano
+    addProp(950, 850, 100, 40, "🏺", 40); // Hallway vase
 
-    // Garden (Outside)
-    for(let i=0; i<15; i++) {{
-        let tx = 200 + Math.random()*1600;
+    // Garden Trees
+    for(let i=0; i<25; i++) {{
+        let tx = 100 + Math.random()*1800;
         let ty = 50 + Math.random()*300;
-        addProp(tx, ty, 60, 60, "🌲", 80);
+        addProp(tx, ty, 50, 50, "🌲", 80);
     }}
-    addProp(900, 250, 150, 100, "⛲", 100); // Fountain
+    addProp(900, 250, 150, 100, "⛲", 100); // Garden Fountain
 
     // --- NPCs ---
     const npcs = [
-        {{ name: "Rahul", x: 600, y: 600, w: 30, h: 40, data: {json.dumps(suspects[0])} }}, // Kitchen
-        {{ name: "Aditi", x: 1350, y: 550, w: 30, h: 40, data: {json.dumps(suspects[1])} }}, // Library
-        {{ name: "Karan", x: 1000, y: 300, w: 30, h: 40, data: {json.dumps(suspects[2])} }}, // Garden
-        {{ name: "Prof. Aris", x: 700, y: 1000, w: 30, h: 40, data: {json.dumps(suspects[3])} }}, // Study
-        {{ name: "Mme. Elara", x: 950, y: 800, w: 30, h: 40, data: {json.dumps(suspects[4])} }} // Hall
+        {{ name: "Rahul", x: 600, y: 500, w: 30, h: 40, data: {json.dumps(suspects[0])} }},
+        {{ name: "Aditi", x: 1350, y: 550, w: 30, h: 40, data: {json.dumps(suspects[1])} }},
+        {{ name: "Karan", x: 1000, y: 350, w: 30, h: 40, data: {json.dumps(suspects[2])} }},
+        {{ name: "Prof. Aris", x: 700, y: 1000, w: 30, h: 40, data: {json.dumps(suspects[3])} }},
+        {{ name: "Mme. Elara", x: 1250, y: 1000, w: 30, h: 40, data: {json.dumps(suspects[4])} }}
     ];
 
-    // --- INPUT ---
     window.addEventListener("keydown", (e) => {{
         keys[e.code] = true;
         if(e.code === "Space" && !modalOpen && !padOpen) interact();
         if(e.code === "KeyC") togglePad();
-        if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(e.code)) e.preventDefault();
+        if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space","KeyW","KeyA","KeyS","KeyD"].includes(e.code)) e.preventDefault();
     }});
     window.addEventListener("keyup", (e) => keys[e.code] = false);
 
-    // --- COLLISION LOGIC ---
     function isColliding(rect1, rect2) {{
         return rect1.x < rect2.x + rect2.w && rect1.x + rect1.w > rect2.x &&
                rect1.y < rect2.y + rect2.h && rect1.y + rect1.h > rect2.y;
@@ -174,21 +164,22 @@ game_html = f"""
 
     function canMove(newX, newY) {{
         let pNext = {{ x: newX, y: newY, w: player.w, h: player.h }};
-        
-        // World Bounds
         if(newX < 0 || newX + player.w > MAP_W || newY < 0 || newY + player.h > MAP_H) return false;
-        
-        // Walls
         for(let w of walls) if(isColliding(pNext, w)) return false;
-        // Furniture
         for(let f of furniture) if(isColliding(pNext, f)) return false;
-        // NPCs
         for(let n of npcs) if(isColliding(pNext, n)) return false;
-
         return true;
     }}
 
-    // --- ENGINE LOOP ---
+    // Exactly figures out which room the player is in based on Coordinates
+    function getRoom(px, py) {{
+        if(px < 500 || px > 1500 || py < 400 || py > 1200) return "Garden";
+        if(px >= 500 && px <= 850 && py >= 400 && py <= 750) return "Kitchen";
+        if(px >= 1150 && px <= 1500 && py >= 400 && py <= 750) return "Library";
+        if(px >= 500 && px <= 850 && py >= 850 && py <= 1200) return "Study";
+        return "Hall";
+    }}
+
     function update() {{
         if(modalOpen || padOpen) return;
 
@@ -201,7 +192,6 @@ game_html = f"""
         if (dx !== 0 && canMove(player.x + dx, player.y)) player.x += dx;
         if (dy !== 0 && canMove(player.x, player.y + dy)) player.y += dy;
         
-        // Proximity check for interaction
         npcs.forEach(n => {{
             let dist = Math.hypot((player.x + player.w/2) - (n.x + n.w/2), (player.y + player.h/2) - (n.y + n.h/2));
             n.near = dist < 70;
@@ -209,50 +199,46 @@ game_html = f"""
     }}
 
     function draw() {{
-        // 1. CLEAR & SETUP CAMERA
-        ctx.fillStyle = "#2d4a22"; // Grass color outside
+        ctx.fillStyle = "#2d4a22"; // Garden Grass Background
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         ctx.save();
-        // The magic camera math: center the canvas on the player
         let camX = canvas.width/2 - (player.x + player.w/2);
         let camY = canvas.height/2 - (player.y + player.h/2);
         ctx.translate(camX, camY);
 
-        // 2. DRAW OUTSIDE WORLD
-        // Draw dirt path to door
-        ctx.fillStyle = "#5c4033"; ctx.fillRect(900, 1180, 200, 800);
-        ctx.fillStyle = "#5c4033"; ctx.fillRect(900, 300, 200, 100);
+        // Draw outside paths
+        ctx.fillStyle = "#5c4033"; ctx.fillRect(900, 1180, 200, 800); // Path to front door
+        ctx.fillStyle = "#5c4033"; ctx.fillRect(900, 300, 200, 100);  // Path to fountain
 
-        // 3. DRAW MANSION FLOOR
-        ctx.fillStyle = "#8b5a2b"; // Wood floor
-        ctx.fillRect(mansion.x, mansion.y, mansion.w, mansion.h);
+        // Draw Mansion Floor Base
+        ctx.fillStyle = "#8b5a2b"; ctx.fillRect(500, 400, 1000, 800); 
         
-        // Draw Carpets
-        ctx.fillStyle = "#800000"; ctx.fillRect(850, 450, 300, 700); // Hall carpet
-        ctx.fillStyle = "#3e2723"; ctx.fillRect(520, 420, 260, 310); // Kitchen tile
-        ctx.fillStyle = "#1a237e"; ctx.fillRect(1170, 420, 310, 310); // Library rug
+        // Draw Distinct Room Carpets
+        ctx.fillStyle = "#3e2723"; ctx.fillRect(520, 420, 310, 310); // Kitchen
+        ctx.fillStyle = "#1a237e"; ctx.fillRect(1170, 420, 310, 310); // Library
+        ctx.fillStyle = "#4a148c"; ctx.fillRect(520, 870, 310, 310); // Study
+        ctx.fillStyle = "#800000"; ctx.fillRect(850, 420, 300, 760); // Grand Hall Runner
 
-        // 4. DRAW WALLS
+        // Draw Walls
         ctx.fillStyle = "#111";
         walls.forEach(w => ctx.fillRect(w.x, w.y, w.w, w.h));
 
-        // 5. DRAW FURNITURE (USING EMOJIS AS SPRITES!)
+        // Draw Furniture
         ctx.textAlign = "center"; ctx.textBaseline = "middle";
         furniture.forEach(f => {{
             ctx.font = f.size + "px Arial";
             ctx.fillText(f.emoji, f.x + f.w/2, f.y + f.h/2);
-            // Debug box: ctx.strokeStyle="red"; ctx.strokeRect(f.x, f.y, f.w, f.h);
         }});
 
-        // 6. ROOM LABELS
-        ctx.fillStyle = "rgba(255,255,255,0.2)"; ctx.font = "bold 40px 'Nunito'";
-        ctx.fillText("KITCHEN", 650, 600);
-        ctx.fillText("LIBRARY", 1350, 600);
-        ctx.fillText("GARDEN", 1000, 200);
-        ctx.fillText("GRAND HALL", 1000, 800);
+        // Draw Room Typography
+        ctx.fillStyle = "rgba(255,255,255,0.3)"; ctx.font = "bold 35px 'Nunito'";
+        ctx.fillText("KITCHEN", 675, 575);
+        ctx.fillText("LIBRARY", 1325, 575);
+        ctx.fillText("THE STUDY", 675, 1025);
+        ctx.fillText("GRAND HALL", 1000, 700);
 
-        // 7. DRAW NPCs
+        // Draw NPCs
         npcs.forEach(n => {{
             ctx.font = "40px Arial";
             ctx.fillText(n.data.avatar, n.x + n.w/2, n.y + n.h/2);
@@ -265,50 +251,37 @@ game_html = f"""
             }}
         }});
 
-        // 8. DRAW PLAYER
+        // Draw Player
         ctx.font = "40px Arial";
         ctx.fillText(player.avatar, player.x + player.w/2, player.y + player.h/2);
         ctx.fillStyle = "#00d2ff"; ctx.font = "bold 14px 'Nunito'";
         ctx.fillText("Shanaya", player.x + player.w/2, player.y - 15);
 
-        // 9. ADVANCED FOG OF WAR (Lighting System)
-        // Determine player room
-        let pRoom = "Outside";
-        if(player.x > 500 && player.x < 1500 && player.y > 400 && player.y < 1200) {{
-            if(player.x < 800 && player.y < 750) pRoom = "Kitchen";
-            else if(player.x > 1150 && player.y < 750) pRoom = "Library";
-            else if(player.x < 800 && player.y > 850) pRoom = "Study";
-            else pRoom = "Hall";
+        // --- FIXED FOG OF WAR ---
+        // Instead of erasing, we draw solid dark blocks over unvisited rooms.
+        let pRoom = getRoom(player.x + player.w/2, player.y + player.h/2);
+        ctx.fillStyle = "rgba(0, 0, 0, 0.96)"; // Pitch black shadow
+
+        if (pRoom === "Garden") {{
+            // If outside, the whole mansion is dark
+            ctx.fillRect(500, 400, 1000, 800);
+        }} else {{
+            // Darken individual rooms if you aren't inside them
+            if (pRoom !== "Kitchen") ctx.fillRect(500, 400, 350, 350);
+            if (pRoom !== "Library") ctx.fillRect(1150, 400, 350, 350);
+            if (pRoom !== "Study") ctx.fillRect(500, 850, 350, 350);
+            
+            if (pRoom !== "Hall") {{
+                ctx.fillRect(850, 400, 300, 800); // The center hall
+                ctx.fillRect(1150, 850, 350, 350); // The empty bottom right corner
+            }}
         }}
 
-        // Draw shadow over mansion
-        ctx.fillStyle = "rgba(0,0,0,0.92)";
-        if(pRoom !== "Outside") {{
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.fillRect(500, 400, 1000, 800); // Darken whole house
-            
-            // Punch a hole for the active room
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.fillStyle = "black";
-            if(pRoom === "Kitchen") ctx.fillRect(500, 400, 300, 350);
-            else if(pRoom === "Library") ctx.fillRect(1150, 400, 350, 350);
-            else if(pRoom === "Study") ctx.fillRect(500, 850, 300, 350);
-            else ctx.fillRect(800, 400, 350, 800); // Hall
-            
-            // Light aura around player
-            let grd = ctx.createRadialGradient(player.x+15, player.y+20, 10, player.x+15, player.y+20, 150);
-            grd.addColorStop(0, "rgba(0,0,0,1)"); grd.addColorStop(1, "rgba(0,0,0,0)");
-            ctx.fillStyle = grd;
-            ctx.beginPath(); ctx.arc(player.x+15, player.y+20, 150, 0, Math.PI*2); ctx.fill();
-        }}
-        ctx.globalCompositeOperation = 'source-over';
-
-        ctx.restore(); // END CAMERA
+        ctx.restore(); 
     }}
 
     function loop() {{ update(); draw(); requestAnimationFrame(loop); }}
 
-    // --- INTERACTIONS ---
     function interact() {{
         let target = npcs.find(n => n.near);
         if(target) {{
@@ -326,7 +299,6 @@ game_html = f"""
         setTimeout(() => modalOpen = false, 200);
     }}
 
-    // --- CASE FILE LOGIC ---
     const padData = {{}};
     window.togglePad = function() {{
         if(modalOpen) return;
@@ -369,7 +341,6 @@ components.html(game_html, height=650)
 
 st.divider()
 
-# --- THE ACCUSATION ---
 col1, col2, col3 = st.columns(3)
 with col1: guess_who = st.selectbox("Suspect", ["Select"] + [s["name"] for s in suspects])
 with col2: guess_where = st.selectbox("Location", ["Select"] + rooms)
