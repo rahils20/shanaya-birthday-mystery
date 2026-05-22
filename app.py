@@ -92,9 +92,7 @@ game_html = f"""
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    // EXPANDED MAP SIZE
     const MAP_W = 3200; const MAP_H = 2600;
-
     const player = {{ x: 1500, y: 2200, w: 24, h: 32, speed: 7 }};
     const keys = {{}};
     let modalOpen = false; let padOpen = false;
@@ -107,61 +105,63 @@ game_html = f"""
     function addFurn(x, y, w, h, type, solid=true) {{ furniture.push({{x, y, w, h, type, solid}}); }}
     function addProp(x, y, title, text) {{ interactables.push({{x, y, w: 24, h: 24, title, text, near: false}}); }}
 
+    // --- ARCHITECTURAL WALLS (FIXED DOORWAYS) ---
     // 1. Estate Perimeter
-    W(0, 0, MAP_W, 20); W(0, MAP_H-20, 1400, 20); W(1600, MAP_H-20, 1600, 20); // Gate at 1400-1600
+    W(0, 0, MAP_W, 20); W(0, MAP_H-20, 1400, 20); W(1600, MAP_H-20, 1600, 20); 
     W(0, 0, 20, MAP_H); W(MAP_W-20, 0, 20, MAP_H);
 
-    // 2. The Mega Mansion Walls
-    // Bounds: X(600 to 2400), Y(400 to 1800)
-    // Master Suite (North Wing) - HUGE
+    // 2. Master Suite (North Wing)
     W(1000, 400, 1000, 20); // Top wall
     W(1000, 400, 20, 400); // Master Left
     W(2000, 400, 20, 400); // Master Right
-    W(1600, 400, 20, 400); // Split Bed from Bath/WIW
-    W(1600, 600, 400, 20); // Split Bath from WIW
+    W(1600, 400, 20, 100); // WIW Left Top (Door gap 500-600)
+    W(1600, 600, 20, 200); // WIW Left Bottom
+    W(1600, 600, 400, 20); // Split Bath/WIW horizontally
 
-    // West Wing (Kitchen, Dining, Lounge)
-    W(600, 800, 600, 20); // West Top
-    W(600, 800, 20, 1000); // West Left
-    W(600, 1800, 600, 20); // West Bottom
-    W(600, 1100, 600, 20); // Split Kitchen/Dining
-    W(600, 1400, 600, 20); // Split Dining/Lounge
+    // 3. Horizontal Room Dividers
+    W(600, 800, 600, 20); // West Wing Top
+    W(1200, 780, 100, 20); // Master Door Gap (1300-1450)
+    W(1450, 780, 350, 20); // Right side of Master Wall
+    W(1800, 800, 600, 20); // East Wing Top
 
-    // East Wing (Library, Study)
-    W(1800, 800, 600, 20); // East Top
-    W(2400, 800, 20, 1000); // East Right
-    W(1800, 1800, 600, 20); // East Bottom
-    W(1800, 1300, 600, 20); // Split Lib/Study
+    // 4. West Wing & Room Splitters
+    W(600, 800, 20, 1000); // Far Left Wall
+    W(600, 1800, 600, 20); // Bottom Wall
+    W(600, 1100, 500, 20); // Kitchen/Dining Split (Gap near hall)
+    W(600, 1400, 500, 20); // Dining/Lounge Split (Gap near hall)
 
-    // Central Grand Hall
-    W(1200, 1800, 150, 20); W(1450, 1800, 150, 20); // Front Doors
-    W(1200, 800, 20, 1000); W(1800, 800, 20, 1000); // Hall Walls
+    // 5. East Wing & Room Splitters
+    W(2400, 800, 20, 1000); // Far Right Wall
+    W(1800, 1800, 600, 20); // Bottom Wall
+    W(1900, 1300, 500, 20); // Library/Study Split (Gap near hall)
 
-    // Interior Doors (Gaps)
-    // Master
-    W(1200, 780, 150, 20); W(1450, 780, 150, 20); // Master Bed Door
-    W(1580, 500, 20, 80); // Door to WIW
-    W(1580, 700, 20, 80); // Door to Bath
+    // 6. Central Hall Walls (THE CRUCIAL DOORWAY GAPS)
+    // West Hallway Wall
+    W(1180, 800, 20, 100);  // Wall above Kitchen door
+    W(1180, 1050, 20, 150); // Wall between Kitchen & Dining doors
+    W(1180, 1350, 20, 200); // Wall between Dining & Lounge doors
+    W(1180, 1700, 20, 100); // Wall below Lounge door
+    
+    // East Hallway Wall
+    W(1800, 800, 20, 200);  // Wall above Library door
+    W(1800, 1150, 20, 350); // Wall between Lib & Study doors
+    W(1800, 1650, 20, 150); // Wall below Study door
 
-    // West Doors
-    W(1180, 900, 20, 150); // Kitchen Door
-    W(1180, 1200, 20, 150); // Dining Door
-    W(1180, 1550, 20, 150); // Lounge Door
+    // Front Entrance
+    W(1200, 1800, 200, 20); // Left front wall (Gap 1400-1600)
+    W(1600, 1800, 200, 20); // Right front wall
 
-    // East Doors
-    W(1800, 1000, 20, 150); // Library Door
-    W(1800, 1500, 20, 150); // Study Door
 
-    // 3. West Garden (Pickleball)
+    // --- OUTDOOR & INTERIOR FURNITURE ---
+    // West Garden (Pickleball)
     addFurn(100, 1000, 450, 700, "pickleball", false);
 
-    // 4. East Garden (Pool Deck)
+    // East Garden (Pool Deck)
     addFurn(2450, 900, 700, 800, "deck", false);
     addFurn(2550, 1000, 400, 400, "pool", false); // Swim enabled
     addFurn(2850, 1500, 180, 80, "bar");
     addFurn(2550, 1500, 60, 100, "deckchair"); addFurn(2650, 1500, 60, 100, "deckchair");
 
-    // 5. Advanced Interior Furniture
     // Master Bedroom
     addFurn(1250, 450, 200, 220, "bed");
     addFurn(1050, 650, 150, 80, "couch");
@@ -199,14 +199,14 @@ game_html = f"""
     addFurn(1300, 1450, 180, 140, "piano");       
     addFurn(1300, 850, 400, 900, "red_carpet", false);
 
-    // 6. Hyper-Personalized Glowing Props
+    // --- GLOWING PROPS (INTERACTABLES) ---
     addProp(900, 970, "Birthday Cake", "A gorgeous Paleo Bakes sugar-free chocolate cake! Looks absolutely delicious.");
     addProp(1850, 640, "Vanity Setup", "A very specific skincare regimen: CeraVe face wash for normal to oily skin, Tretinoin 0.025, and Isdin Fusion Water sunscreen.");
     addProp(1700, 440, "Wardrobe Setup", "A neat row of custom Bombay Shirt Company shirts and several pairs of Brooks Running shoes.");
     addProp(850, 1230, "Warm Food", "A massive, fresh order of Egg Schezwan Fried Rice from Kuai Kitchen.");
     addProp(2600, 1520, "Poolside Items", "A Garmin smartwatch and some Speedo swimming gear left by the water.");
     
-    // 7. Garden Trees
+    // Garden Trees
     for(let i=0; i<80; i++) {{
         let tx = 100 + Math.random()*3000; let ty = 100 + Math.random()*2400;
         if(tx > 500 && tx < 2500 && ty > 300 && ty < 1900) continue; 
@@ -216,11 +216,11 @@ game_html = f"""
         addFurn(tx, ty, 60, 60, "tree");
     }}
 
-    // Spawn NPCs
+    // Spawn NPCs (mostly indoors)
     rawNpcs.forEach(data => {{
-        let nx = 1300 + Math.random()*400; let ny = 1000 + Math.random()*600;
-        if(Math.random() < 0.2) {{ nx = 2600 + Math.random()*200; ny = 1000 + Math.random()*300; }} 
-        if(Math.random() < 0.1) {{ nx = 200 + Math.random()*200; ny = 1200 + Math.random()*300; }} 
+        let nx = 1300 + Math.random()*400; let ny = 1000 + Math.random()*600; // Hallway default
+        if(Math.random() < 0.2) {{ nx = 2600 + Math.random()*200; ny = 1000 + Math.random()*300; }} // Pool
+        if(Math.random() < 0.1) {{ nx = 200 + Math.random()*200; ny = 1200 + Math.random()*300; }}  // Pickleball
         npcs.push({{ x: nx, y: ny, w: 24, h: 32, data: data, vx: 0, vy: 0, timer: 0 }});
     }});
 
@@ -287,7 +287,7 @@ game_html = f"""
         }});
     }}
 
-    // --- DRAWING WITH ADVANCED CANVAS SHADING ---
+    // --- RENDER PIPELINE ---
     function drawCharacter(x, y, color, name, isPlayer=false) {{
         ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
         ctx.fillStyle = color; ctx.fillRect(x, y+10, 24, 22); 
@@ -339,6 +339,8 @@ game_html = f"""
                 ctx.fillStyle = grad; ctx.fillRect(f.x, f.y, f.w, f.h); 
                 ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 3; 
                 ctx.beginPath(); ctx.moveTo(f.x+40, f.y+40); ctx.lineTo(f.x+150, f.y+60); ctx.stroke();
+                ctx.fillStyle = "#e91e63"; ctx.beginPath(); ctx.arc(f.x+f.w/2, f.y+f.h/2, 25, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#0288d1"; ctx.beginPath(); ctx.arc(f.x+f.w/2, f.y+f.h/2, 12, 0, Math.PI*2); ctx.fill(); 
             }}
             else if(f.type === "pickleball") {{
                 ctx.fillStyle = "#1b5e20"; ctx.fillRect(f.x, f.y, f.w, f.h); 
@@ -363,8 +365,8 @@ game_html = f"""
                 ctx.fillStyle = '#3E2723'; ctx.fillRect(f.x,f.y,f.w,f.h);
                 ctx.fillStyle = 'white'; 
                 for(let i=0; i<4; i++) {{
-                    ctx.beginPath(); ctx.arc(f.x+40 + (i*70), f.y+20, 12, 0, Math.PI*2); ctx.fill();
-                    ctx.beginPath(); ctx.arc(f.x+40 + (i*70), f.y+100, 12, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(f.x+40 + (i*70), f.y+20, 10, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(f.x+40 + (i*70), f.y+100, 10, 0, Math.PI*2); ctx.fill();
                 }}
             }}
             else if(f.type === "bed") {{
