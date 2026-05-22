@@ -24,13 +24,14 @@ colors = ["#e50914", "#9c27b0", "#3f51b5", "#009688", "#ff9800", "#795548", "#60
 npcs_data = []
 for name in all_names:
     clue = "Happy Birthday Shanaya! Have the best day ever!"
-    if name == "Maanav": clue = "The murderer definitely has a sweet tooth. Check the Kitchen."
-    elif name == "Divya": clue = "I saw someone carrying a heavy candlestick towards the West Wing."
-    elif name == "Sarthak": clue = "The crime happened indoors for sure. The garden was empty all night."
-    elif name == "Anoushka": clue = "I heard a loud thud near the Dining Room."
-    elif name == "Rahil": clue = "Happy Birthday baby! I put this whole thing together for you. Have fun playing, I love you!"
-    elif name == "Kshitija": clue = "Happy Birthday Shanaya! Can't wait for us to celebrate together soon!"
-    elif name in ["Shlokk", "Jai"]: clue = "I didn't do it, I swear! I've been by the pool the whole time."
+    # Neutral, non-obvious clues
+    if name == "Maanav": clue = "Happy Birthday! Honestly, I'm exhausted. I hit a massive tempo sprint session today and my macros are completely depleted. I need carbs."
+    elif name == "Divya": clue = "I went to the Library earlier and noticed the heavy brass candlestick was missing from the desk."
+    elif name == "Sarthak": clue = "I've been hanging by the pickleball court all night. Nobody came outside with the cake, so it has to be indoors."
+    elif name == "Anoushka": clue = "I was walking past the Dining Room around midnight and heard a loud crash coming from the Kitchen."
+    elif name == "Rahil": clue = "Hey babe! I hope you're having fun. Talk to everyone to figure this out!"
+    elif name == "Kshitija": clue = "Happy Birthday Shanaya! Let's celebrate properly soon. Keep investigating!"
+    elif name in ["Shlokk", "Jai"]: clue = "We've literally been swimming all night. Check our TikToks, we have a rock-solid alibi."
 
     npcs_data.append({
         "name": name, "clue": clue, "color": random.choice(colors),
@@ -50,7 +51,7 @@ game_html = f"""
     #dialogue-box {{
         display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
         background: #1e1e24; border: 3px solid #fdd835; border-radius: 12px; padding: 25px;
-        text-align: center; width: 70%; max-width: 500px; z-index: 100; box-shadow: 0px 20px 60px rgba(0,0,0,0.95);
+        text-align: center; width: 70%; max-width: 600px; z-index: 100; box-shadow: 0px 20px 60px rgba(0,0,0,0.95); max-height: 90vh; overflow-y: auto;
     }}
     #dialogue-box h2 {{ color: #fdd835; margin-top: 0; font-family: 'Cinzel', serif; line-height: 1.2;}}
     .btn {{ background: #fdd835; color: #111; border: none; padding: 10px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 16px; margin-top: 15px; width: 100%; }}
@@ -65,12 +66,16 @@ game_html = f"""
     .toggle-cycle {{ background: #222; border: 1px solid #444; color: white; width: 35px; height: 30px; border-radius: 4px; cursor: pointer; font-weight: bold; }}
     .toggle-cycle.x {{ background: rgba(255,0,0,0.2); border-color: red; color: red; }}
     .toggle-cycle.check {{ background: rgba(0,255,0,0.2); border-color: lime; color: lime; }}
+    
+    #progress-tracker {{ position: absolute; top: 15px; right: 20px; background: rgba(0,0,0,0.8); padding: 10px 20px; border-radius: 8px; font-weight: bold; border: 2px solid #fdd835; z-index: 50;}}
 </style>
 </head>
 <body>
 
 <div id="game-container">
     <canvas id="gameCanvas" width="1000" height="680"></canvas>
+    <div id="progress-tracker">Guests Interrogated: <span id="guest-count">0</span>/24</div>
+    
     <div id="dialogue-box">
         <h2 id="modal-title">Name</h2>
         <div id="video-container" style="border-radius: 8px; overflow: hidden; margin-top: 10px;"></div>
@@ -96,6 +101,10 @@ game_html = f"""
     const player = {{ x: 1500, y: 2200, w: 24, h: 32, speed: 7 }};
     const keys = {{}};
     let modalOpen = false; let padOpen = false;
+    
+    // PROGRESS TRACKING
+    const interrogatedGuests = new Set();
+    const TOTAL_GUESTS = 24;
 
     const rawNpcs = {json.dumps(npcs_data)};
     const npcs = [];
@@ -103,79 +112,76 @@ game_html = f"""
 
     function W(x, y, w, h) {{ walls.push({{x, y, w, h}}); }}
     function addFurn(x, y, w, h, type, solid=true) {{ furniture.push({{x, y, w, h, type, solid}}); }}
-    // Interaction radius added as parameter
-    function addProp(x, y, title, text, radius=130) {{ interactables.push({{x, y, w: 24, h: 24, title, text, radius, near: false}}); }}
+    function addProp(x, y, title, text, type="prop", radius=130) {{ interactables.push({{x, y, w: 24, h: 24, title, text, type, radius, near: false}}); }}
 
     // --- FLAWLESS ARCHITECTURAL WALLS ---
-    // 1. Estate Perimeter
     W(0, 0, MAP_W, 20); W(0, MAP_H-20, 1400, 20); W(1600, MAP_H-20, 1600, 20); 
     W(0, 0, 20, MAP_H); W(MAP_W-20, 0, 20, MAP_H);
 
-    // 2. Master Suite (North Wing)
-    W(1000, 400, 1000, 20); // Top
-    W(1000, 400, 20, 380);  // Left
-    W(1980, 400, 20, 380);  // Right
-    W(1000, 780, 300, 20);  // Bottom Left
-    W(1450, 780, 550, 20);  // Bottom Right (Main Master Door Gap at 1300-1450)
+    // Master Suite (North Wing)
+    W(1000, 400, 1000, 20); 
+    W(1000, 400, 20, 380);  
+    W(1980, 400, 20, 380);  
+    W(1000, 780, 300, 20);  
+    W(1450, 780, 550, 20);  
 
-    // Master Suite Interior (Bath & WIW Dividers)
-    W(1600, 420, 20, 80);   // WIW Left Wall Top
-    W(1600, 600, 20, 50);   // WIW / Bath vertical separator
-    W(1600, 730, 20, 50);   // Bath Left Wall Bottom
-    W(1620, 600, 360, 20);  // Bath / WIW horizontal floor divider
+    // WIW & Bath Dividers
+    W(1600, 420, 20, 80);   
+    W(1600, 600, 20, 50);   
+    W(1600, 730, 20, 50);   
+    W(1620, 600, 360, 20);  
 
-    // 3. West Wing
-    W(600, 800, 400, 20);   // Top West
-    W(600, 800, 20, 1000);  // Far West
-    W(600, 1800, 600, 20);  // Bottom West
-    W(620, 1100, 560, 20);  // Kitchen/Dining divider
-    W(620, 1400, 560, 20);  // Dining/Lounge divider
+    // West Wing
+    W(600, 800, 400, 20);   
+    W(600, 800, 20, 1000);  
+    W(600, 1800, 600, 20);  
+    W(620, 1100, 560, 20);  
+    W(620, 1400, 560, 20);  
 
-    // West Hallway Wall (with precise doors)
-    W(1180, 800, 20, 100);  // Above Kitchen
-    W(1180, 1050, 20, 150); // Between Kitchen/Dining
-    W(1180, 1350, 20, 200); // Between Dining/Lounge
-    W(1180, 1700, 20, 100); // Below Lounge
+    W(1180, 800, 20, 100);  
+    W(1180, 1050, 20, 150); 
+    W(1180, 1350, 20, 200); 
+    W(1180, 1700, 20, 100); 
 
-    // 4. East Wing
-    W(1800, 800, 600, 20);  // Top East
-    W(2380, 800, 20, 1000); // Far East
-    W(1800, 1800, 600, 20); // Bottom East
-    W(1820, 1300, 560, 20); // Library/Study divider
+    // East Wing
+    W(1800, 800, 600, 20);  
+    W(2380, 800, 20, 1000); 
+    W(1800, 1800, 600, 20); 
+    W(1820, 1300, 560, 20); 
 
-    // East Hallway Wall (with precise doors)
-    W(1800, 800, 20, 200);  // Above Library
-    W(1800, 1150, 20, 350); // Between Library/Study
-    W(1800, 1650, 20, 150); // Below Study
+    W(1800, 800, 20, 200);  
+    W(1800, 1150, 20, 350); 
+    W(1800, 1650, 20, 150); 
 
-    // 5. Central Hall Front Entrance
+    // Front Entrance
     W(1200, 1800, 200, 20); 
     W(1600, 1800, 200, 20); 
 
-
     // --- OUTDOOR & INTERIOR FURNITURE ---
     addFurn(100, 1000, 450, 700, "pickleball", false);
-
     addFurn(2450, 900, 700, 800, "deck", false);
     addFurn(2550, 1000, 400, 400, "pool", false); 
     addFurn(2850, 1500, 180, 80, "bar");
     addFurn(2550, 1500, 60, 100, "deckchair"); addFurn(2650, 1500, 60, 100, "deckchair");
 
+    // Master Bedroom & Bath (Fixed Placement)
     addFurn(1250, 450, 200, 220, "bed");
     addFurn(1050, 650, 150, 80, "couch");
     addFurn(1150, 480, 60, 40, "nightstand"); addFurn(1480, 480, 60, 40, "nightstand");
     addFurn(1650, 420, 300, 50, "wardrobe");
     addFurn(1650, 530, 250, 50, "clothing_rack");
-    addFurn(1650, 620, 100, 150, "bathtub");
-    addFurn(1850, 620, 120, 60, "vanity");
-    addFurn(1900, 720, 50, 60, "toilet");
+    addFurn(1850, 620, 100, 150, "bathtub"); // Moved away from door!
+    addFurn(1650, 620, 120, 60, "vanity");
+    addFurn(1900, 750, 50, 40, "toilet");
 
     addFurn(800, 950, 200, 80, "kitchen_island"); 
     addFurn(620, 820, 60, 100, "fridge");
     addFurn(620, 950, 60, 120, "counters");
     addFurn(750, 1200, 300, 120, "dining_table");   
     addFurn(800, 1500, 250, 100, "lounge_sofa");
-    addFurn(850, 1620, 150, 80, "coffee_table");
+    
+    // THE LOUNGE COMPUTER
+    addFurn(650, 1600, 120, 80, "computer_desk");
 
     addFurn(2100, 820, 40, 400, "bookshelf_vert");     
     addFurn(1850, 1150, 300, 40, "bookshelf");
@@ -187,13 +193,14 @@ game_html = f"""
     addFurn(1300, 850, 400, 900, "red_carpet", false);
 
     // --- ACCESSIBLE GLOWING PROPS ---
-    addProp(900, 970, "Birthday Cake", "A gorgeous Paleo Bakes sugar-free chocolate cake! Looks absolutely delicious.");
-    addProp(1850, 640, "Vanity Setup", "A very specific skincare regimen: CeraVe face wash for normal to oily skin, Tretinoin 0.025, and Isdin Fusion Water sunscreen.");
-    addProp(1700, 440, "Wardrobe Setup", "A neat row of custom Bombay Shirt Company shirts and several pairs of Brooks Running shoes.");
-    addProp(850, 1230, "Warm Food", "A massive, fresh order of Egg Schezwan Fried Rice from Kuai Kitchen.");
-    addProp(2600, 1520, "Poolside Items", "A Garmin smartwatch and some Speedo swimming gear left by the water.");
+    addProp(650, 1600, "Security Computer", "System Locked.", "computer", 140);
+    addProp(900, 970, "Empty Stand", "Wait... this is where the Paleo Bakes sugar-free chocolate cake was supposed to be! It's completely missing, but there is a smear of sugar-free icing leading towards the door.", "prop");
+    addProp(1700, 640, "Vanity Setup", "A very specific skincare regimen: CeraVe face wash for normal to oily skin, Tretinoin 0.025, and Isdin Fusion Water sunscreen.", "prop");
+    addProp(1700, 440, "Wardrobe Setup", "A neat row of custom Bombay Shirt Company shirts and several pairs of Brooks Running shoes.", "prop");
+    addProp(850, 1230, "Warm Food", "A massive, fresh order of Egg Schezwan Fried Rice from Kuai Kitchen.", "prop");
+    addProp(2600, 1520, "Poolside Items", "A Garmin smartwatch and some Speedo swimming gear left by the water.", "prop");
     
-    // Garden Trees
+    // Trees
     for(let i=0; i<80; i++) {{
         let tx = 100 + Math.random()*3000; let ty = 100 + Math.random()*2400;
         if(tx > 500 && tx < 2500 && ty > 300 && ty < 1900) continue; 
@@ -203,10 +210,22 @@ game_html = f"""
         addFurn(tx, ty, 60, 60, "tree");
     }}
 
+    // Spawn NPCs Dynamically across rooms
+    const spawnZones = [
+        {{x: 650, y: 850, w: 400, h: 200}}, // Kitchen
+        {{x: 650, y: 1150, w: 400, h: 200}}, // Dining
+        {{x: 650, y: 1450, w: 400, h: 200}}, // Lounge
+        {{x: 1850, y: 850, w: 400, h: 400}}, // Library
+        {{x: 1850, y: 1350, w: 400, h: 300}}, // Study
+        {{x: 1250, y: 850, w: 400, h: 800}}, // Hall
+        {{x: 2500, y: 1000, w: 200, h: 300}}, // Pool
+        {{x: 200, y: 1000, w: 300, h: 400}}  // Pickleball
+    ];
+
     rawNpcs.forEach(data => {{
-        let nx = 1300 + Math.random()*400; let ny = 1000 + Math.random()*600;
-        if(Math.random() < 0.2) {{ nx = 2600 + Math.random()*200; ny = 1000 + Math.random()*300; }} 
-        if(Math.random() < 0.1) {{ nx = 200 + Math.random()*200; ny = 1200 + Math.random()*300; }} 
+        let zone = spawnZones[Math.floor(Math.random() * spawnZones.length)];
+        let nx = zone.x + Math.random() * zone.w;
+        let ny = zone.y + Math.random() * zone.h;
         npcs.push({{ x: nx, y: ny, w: 24, h: 32, data: data, vx: 0, vy: 0, timer: 0 }});
     }});
 
@@ -268,7 +287,6 @@ game_html = f"""
             n.near = Math.hypot((player.x) - (n.x), (player.y) - (n.y)) < 60;
         }});
 
-        // WIDENED INTERACTION RADIUS
         interactables.forEach(prop => {{
             prop.near = Math.hypot((player.x + player.w/2) - (prop.x + 12), (player.y + player.h/2) - (prop.y + 12)) < prop.radius;
         }});
@@ -307,8 +325,7 @@ game_html = f"""
         ctx.fillRect(1000, 400, 1000, 400); // North
         ctx.fillRect(600, 800, 1800, 1000); // West/East/Hall
         
-        // Bathroom/WIW Tiles
-        ctx.fillStyle = "#cfd8dc"; ctx.fillRect(1600, 400, 400, 400); 
+        ctx.fillStyle = "#cfd8dc"; ctx.fillRect(1600, 400, 400, 400); // Bath/WIW Tiles
 
         ctx.fillStyle = "#1a1a1a";
         ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 12;
@@ -327,7 +344,6 @@ game_html = f"""
                 ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 3; 
                 ctx.beginPath(); ctx.moveTo(f.x+40, f.y+40); ctx.lineTo(f.x+150, f.y+60); ctx.stroke();
                 ctx.fillStyle = "#e91e63"; ctx.beginPath(); ctx.arc(f.x+f.w/2, f.y+f.h/2, 25, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = "#0288d1"; ctx.beginPath(); ctx.arc(f.x+f.w/2, f.y+f.h/2, 12, 0, Math.PI*2); ctx.fill(); 
             }}
             else if(f.type === "pickleball") {{
                 ctx.fillStyle = "#1b5e20"; ctx.fillRect(f.x, f.y, f.w, f.h); 
@@ -347,7 +363,6 @@ game_html = f"""
                 ctx.beginPath(); ctx.arc(f.x+90, f.y-15, 15, 0, Math.PI*2); ctx.fill();
                 ctx.beginPath(); ctx.arc(f.x+150, f.y-15, 15, 0, Math.PI*2); ctx.fill();
             }}
-            else if(f.type === "deckchair") {{ ctx.fillStyle = '#fff'; ctx.fillRect(f.x, f.y, f.w, f.h); ctx.fillStyle = '#03a9f4'; ctx.fillRect(f.x+5, f.y+5, f.w-10, f.h-10);}}
             else if(f.type === "dining_table") {{
                 ctx.fillStyle = '#3E2723'; ctx.fillRect(f.x,f.y,f.w,f.h);
                 ctx.fillStyle = 'white'; 
@@ -355,6 +370,11 @@ game_html = f"""
                     ctx.beginPath(); ctx.arc(f.x+40 + (i*70), f.y+20, 10, 0, Math.PI*2); ctx.fill();
                     ctx.beginPath(); ctx.arc(f.x+40 + (i*70), f.y+100, 10, 0, Math.PI*2); ctx.fill();
                 }}
+            }}
+            else if(f.type === "computer_desk") {{
+                ctx.fillStyle = '#2c3e50'; ctx.fillRect(f.x, f.y, f.w, f.h);
+                ctx.fillStyle = '#ecf0f1'; ctx.fillRect(f.x+30, f.y+20, 60, 40); // Screen
+                ctx.fillStyle = '#3498db'; ctx.fillRect(f.x+35, f.y+25, 50, 30); // Inner Screen glow
             }}
             else if(f.type === "bed") {{
                 ctx.fillStyle = '#3e2723'; ctx.fillRect(f.x,f.y,f.w,f.h); 
@@ -375,20 +395,6 @@ game_html = f"""
             else if(f.type === "bathtub") {{
                 ctx.fillStyle = 'white'; ctx.beginPath(); ctx.roundRect(f.x, f.y, f.w, f.h, 20); ctx.fill();
                 ctx.fillStyle = '#e0e0e0'; ctx.beginPath(); ctx.roundRect(f.x+10, f.y+10, f.w-20, f.h-20, 15); ctx.fill();
-                ctx.fillStyle = 'silver'; ctx.beginPath(); ctx.arc(f.x+f.w/2, f.y+20, 5, 0, Math.PI*2); ctx.fill();
-            }}
-            else if(f.type === "vanity") {{
-                ctx.fillStyle = '#5D4037'; ctx.fillRect(f.x, f.y, f.w, f.h);
-                ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(f.x+f.w/2, f.y+f.h/2, 15, 0, Math.PI*2); ctx.fill();
-            }}
-            else if(f.type === "toilet") {{
-                ctx.fillStyle = 'white'; ctx.fillRect(f.x, f.y, f.w, 20);
-                ctx.beginPath(); ctx.arc(f.x+f.w/2, f.y+40, 20, 0, Math.PI*2); ctx.fill();
-            }}
-            else if(f.type === "wardrobe") {{ ctx.fillStyle = '#4E342E'; ctx.fillRect(f.x, f.y, f.w, f.h); }}
-            else if(f.type === "clothing_rack") {{
-                ctx.fillStyle = '#757575'; ctx.fillRect(f.x, f.y+f.h/2-2, f.w, 4);
-                ctx.fillStyle = '#c62828'; ctx.fillRect(f.x+20, f.y+10, 10, 30); ctx.fillStyle = '#1565c0'; ctx.fillRect(f.x+40, f.y+10, 10, 30);
             }}
             else if(f.type === "tree") {{
                 ctx.fillStyle = '#2e7d32'; ctx.beginPath(); ctx.arc(f.x+30,f.y+30,45,0,Math.PI*2); ctx.fill();
@@ -410,9 +416,9 @@ game_html = f"""
         // Pulsating Interactive Props
         let pulse = Math.sin(Date.now() / 150) * 4;
         interactables.forEach(p => {{
-            ctx.fillStyle = "rgba(255, 215, 0, 0.4)";
+            ctx.fillStyle = p.type === "computer" ? "rgba(0, 215, 255, 0.4)" : "rgba(255, 215, 0, 0.4)";
             ctx.beginPath(); ctx.arc(p.x+12, p.y+12, 20 + pulse, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "rgba(255, 215, 0, 0.8)";
+            ctx.fillStyle = p.type === "computer" ? "rgba(0, 215, 255, 0.8)" : "rgba(255, 215, 0, 0.8)";
             ctx.beginPath(); ctx.arc(p.x+12, p.y+12, 12, 0, Math.PI*2); ctx.fill();
             if(p.near) {{ ctx.fillStyle = "#fff"; ctx.font = "bold 20px Arial"; ctx.fillText("🔍", p.x+12, p.y-15); }}
         }});
@@ -449,15 +455,31 @@ game_html = f"""
     function interact() {{
         let targetProp = interactables.find(p => p.near);
         if(targetProp) {{
-            document.getElementById("modal-title").innerText = targetProp.title;
-            document.getElementById("modal-text").innerText = targetProp.text;
-            document.getElementById("video-container").innerHTML = ""; 
+            if(targetProp.type === "computer") {{
+                if(interrogatedGuests.size < TOTAL_GUESTS) {{
+                    document.getElementById("modal-title").innerText = targetProp.title;
+                    document.getElementById("modal-text").innerText = `Access Denied. You must interrogate all guests first to unlock the security system. (Progress: ${{interrogatedGuests.size}} / ${{TOTAL_GUESTS}})`;
+                    document.getElementById("video-container").innerHTML = ""; 
+                }} else {{
+                    document.getElementById("modal-title").innerText = "SYSTEM UNLOCKED";
+                    document.getElementById("modal-text").innerText = "Rahil says: 'Hey babe, you talked to everyone! Now, why don't you just check the CCTV footage from the Kitchen?'";
+                    // Placeholder for Rahil's Video / CCTV Video
+                    document.getElementById("video-container").innerHTML = `<iframe width="100%" height="280" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" frameborder="0"></iframe>`;
+                }}
+            }} else {{
+                document.getElementById("modal-title").innerText = targetProp.title;
+                document.getElementById("modal-text").innerText = targetProp.text;
+                document.getElementById("video-container").innerHTML = ""; 
+            }}
             document.getElementById("dialogue-box").style.display = "block";
             modalOpen = true; return;
         }}
 
         let target = npcs.find(n => n.near);
         if(target) {{
+            interrogatedGuests.add(target.data.name);
+            document.getElementById("guest-count").innerText = interrogatedGuests.size;
+            
             document.getElementById("modal-title").innerText = "Talking to " + target.data.name;
             document.getElementById("modal-text").innerText = '"' + target.data.clue + '"';
             document.getElementById("video-container").innerHTML = `<iframe width="100%" height="280" src="${{target.data.video}}?autoplay=1" frameborder="0"></iframe>`;
@@ -521,6 +543,7 @@ with col3: guess_weapon = st.selectbox("Weapon", ["Select", "Candlestick", "Pois
 if st.button("MAKE ACCUSATION", use_container_width=True, type="primary"):
     if guess_who == "Maanav" and guess_where == "Kitchen" and guess_weapon == "Candlestick":
         st.success("🎉 CORRECT! You cracked the case, Shanaya! Happy Birthday! 🎂")
+        st.markdown("### 🎁 YOUR SURPRISE GIFT VOUCHER: `HAPPY-B-DAY-SHANAYA-100`")
         st.balloons()
     else:
         st.error("Not quite! Keep exploring the mansion and interrogating the guests.")
