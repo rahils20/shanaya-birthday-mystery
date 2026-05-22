@@ -103,103 +103,90 @@ game_html = f"""
 
     function W(x, y, w, h) {{ walls.push({{x, y, w, h}}); }}
     function addFurn(x, y, w, h, type, solid=true) {{ furniture.push({{x, y, w, h, type, solid}}); }}
-    function addProp(x, y, title, text) {{ interactables.push({{x, y, w: 24, h: 24, title, text, near: false}}); }}
+    // Interaction radius added as parameter
+    function addProp(x, y, title, text, radius=130) {{ interactables.push({{x, y, w: 24, h: 24, title, text, radius, near: false}}); }}
 
-    // --- ARCHITECTURAL WALLS (FIXED DOORWAYS) ---
+    // --- FLAWLESS ARCHITECTURAL WALLS ---
     // 1. Estate Perimeter
     W(0, 0, MAP_W, 20); W(0, MAP_H-20, 1400, 20); W(1600, MAP_H-20, 1600, 20); 
     W(0, 0, 20, MAP_H); W(MAP_W-20, 0, 20, MAP_H);
 
     // 2. Master Suite (North Wing)
-    W(1000, 400, 1000, 20); // Top wall
-    W(1000, 400, 20, 400); // Master Left
-    W(2000, 400, 20, 400); // Master Right
-    W(1600, 400, 20, 100); // WIW Left Top (Door gap 500-600)
-    W(1600, 600, 20, 200); // WIW Left Bottom
-    W(1600, 600, 400, 20); // Split Bath/WIW horizontally
+    W(1000, 400, 1000, 20); // Top
+    W(1000, 400, 20, 380);  // Left
+    W(1980, 400, 20, 380);  // Right
+    W(1000, 780, 300, 20);  // Bottom Left
+    W(1450, 780, 550, 20);  // Bottom Right (Main Master Door Gap at 1300-1450)
 
-    // 3. Horizontal Room Dividers
-    W(600, 800, 600, 20); // West Wing Top
-    W(1200, 780, 100, 20); // Master Door Gap (1300-1450)
-    W(1450, 780, 350, 20); // Right side of Master Wall
-    W(1800, 800, 600, 20); // East Wing Top
+    // Master Suite Interior (Bath & WIW Dividers)
+    W(1600, 420, 20, 80);   // WIW Left Wall Top
+    W(1600, 600, 20, 50);   // WIW / Bath vertical separator
+    W(1600, 730, 20, 50);   // Bath Left Wall Bottom
+    W(1620, 600, 360, 20);  // Bath / WIW horizontal floor divider
 
-    // 4. West Wing & Room Splitters
-    W(600, 800, 20, 1000); // Far Left Wall
-    W(600, 1800, 600, 20); // Bottom Wall
-    W(600, 1100, 500, 20); // Kitchen/Dining Split (Gap near hall)
-    W(600, 1400, 500, 20); // Dining/Lounge Split (Gap near hall)
+    // 3. West Wing
+    W(600, 800, 400, 20);   // Top West
+    W(600, 800, 20, 1000);  // Far West
+    W(600, 1800, 600, 20);  // Bottom West
+    W(620, 1100, 560, 20);  // Kitchen/Dining divider
+    W(620, 1400, 560, 20);  // Dining/Lounge divider
 
-    // 5. East Wing & Room Splitters
-    W(2400, 800, 20, 1000); // Far Right Wall
-    W(1800, 1800, 600, 20); // Bottom Wall
-    W(1900, 1300, 500, 20); // Library/Study Split (Gap near hall)
+    // West Hallway Wall (with precise doors)
+    W(1180, 800, 20, 100);  // Above Kitchen
+    W(1180, 1050, 20, 150); // Between Kitchen/Dining
+    W(1180, 1350, 20, 200); // Between Dining/Lounge
+    W(1180, 1700, 20, 100); // Below Lounge
 
-    // 6. Central Hall Walls (THE CRUCIAL DOORWAY GAPS)
-    // West Hallway Wall
-    W(1180, 800, 20, 100);  // Wall above Kitchen door
-    W(1180, 1050, 20, 150); // Wall between Kitchen & Dining doors
-    W(1180, 1350, 20, 200); // Wall between Dining & Lounge doors
-    W(1180, 1700, 20, 100); // Wall below Lounge door
-    
-    // East Hallway Wall
-    W(1800, 800, 20, 200);  // Wall above Library door
-    W(1800, 1150, 20, 350); // Wall between Lib & Study doors
-    W(1800, 1650, 20, 150); // Wall below Study door
+    // 4. East Wing
+    W(1800, 800, 600, 20);  // Top East
+    W(2380, 800, 20, 1000); // Far East
+    W(1800, 1800, 600, 20); // Bottom East
+    W(1820, 1300, 560, 20); // Library/Study divider
 
-    // Front Entrance
-    W(1200, 1800, 200, 20); // Left front wall (Gap 1400-1600)
-    W(1600, 1800, 200, 20); // Right front wall
+    // East Hallway Wall (with precise doors)
+    W(1800, 800, 20, 200);  // Above Library
+    W(1800, 1150, 20, 350); // Between Library/Study
+    W(1800, 1650, 20, 150); // Below Study
+
+    // 5. Central Hall Front Entrance
+    W(1200, 1800, 200, 20); 
+    W(1600, 1800, 200, 20); 
 
 
     // --- OUTDOOR & INTERIOR FURNITURE ---
-    // West Garden (Pickleball)
     addFurn(100, 1000, 450, 700, "pickleball", false);
 
-    // East Garden (Pool Deck)
     addFurn(2450, 900, 700, 800, "deck", false);
-    addFurn(2550, 1000, 400, 400, "pool", false); // Swim enabled
+    addFurn(2550, 1000, 400, 400, "pool", false); 
     addFurn(2850, 1500, 180, 80, "bar");
     addFurn(2550, 1500, 60, 100, "deckchair"); addFurn(2650, 1500, 60, 100, "deckchair");
 
-    // Master Bedroom
     addFurn(1250, 450, 200, 220, "bed");
     addFurn(1050, 650, 150, 80, "couch");
     addFurn(1150, 480, 60, 40, "nightstand"); addFurn(1480, 480, 60, 40, "nightstand");
-    // WIW
     addFurn(1650, 420, 300, 50, "wardrobe");
     addFurn(1650, 530, 250, 50, "clothing_rack");
-    // Bathroom
     addFurn(1650, 620, 100, 150, "bathtub");
     addFurn(1850, 620, 120, 60, "vanity");
     addFurn(1900, 720, 50, 60, "toilet");
 
-    // Kitchen
     addFurn(800, 950, 200, 80, "kitchen_island"); 
     addFurn(620, 820, 60, 100, "fridge");
     addFurn(620, 950, 60, 120, "counters");
-    
-    // Dining
     addFurn(750, 1200, 300, 120, "dining_table");   
-    
-    // Lounge
     addFurn(800, 1500, 250, 100, "lounge_sofa");
     addFurn(850, 1620, 150, 80, "coffee_table");
 
-    // Library
     addFurn(2100, 820, 40, 400, "bookshelf_vert");     
     addFurn(1850, 1150, 300, 40, "bookshelf");
     addFurn(1900, 950, 100, 100, "reading_chair");
-
-    // Study
     addFurn(2000, 1450, 160, 80, "desk");          
     addFurn(2200, 1450, 60, 60, "plant");
     
-    // Hall
     addFurn(1300, 1450, 180, 140, "piano");       
     addFurn(1300, 850, 400, 900, "red_carpet", false);
 
-    // --- GLOWING PROPS (INTERACTABLES) ---
+    // --- ACCESSIBLE GLOWING PROPS ---
     addProp(900, 970, "Birthday Cake", "A gorgeous Paleo Bakes sugar-free chocolate cake! Looks absolutely delicious.");
     addProp(1850, 640, "Vanity Setup", "A very specific skincare regimen: CeraVe face wash for normal to oily skin, Tretinoin 0.025, and Isdin Fusion Water sunscreen.");
     addProp(1700, 440, "Wardrobe Setup", "A neat row of custom Bombay Shirt Company shirts and several pairs of Brooks Running shoes.");
@@ -216,11 +203,10 @@ game_html = f"""
         addFurn(tx, ty, 60, 60, "tree");
     }}
 
-    // Spawn NPCs (mostly indoors)
     rawNpcs.forEach(data => {{
-        let nx = 1300 + Math.random()*400; let ny = 1000 + Math.random()*600; // Hallway default
-        if(Math.random() < 0.2) {{ nx = 2600 + Math.random()*200; ny = 1000 + Math.random()*300; }} // Pool
-        if(Math.random() < 0.1) {{ nx = 200 + Math.random()*200; ny = 1200 + Math.random()*300; }}  // Pickleball
+        let nx = 1300 + Math.random()*400; let ny = 1000 + Math.random()*600;
+        if(Math.random() < 0.2) {{ nx = 2600 + Math.random()*200; ny = 1000 + Math.random()*300; }} 
+        if(Math.random() < 0.1) {{ nx = 200 + Math.random()*200; ny = 1200 + Math.random()*300; }} 
         npcs.push({{ x: nx, y: ny, w: 24, h: 32, data: data, vx: 0, vy: 0, timer: 0 }});
     }});
 
@@ -282,8 +268,9 @@ game_html = f"""
             n.near = Math.hypot((player.x) - (n.x), (player.y) - (n.y)) < 60;
         }});
 
+        // WIDENED INTERACTION RADIUS
         interactables.forEach(prop => {{
-            prop.near = Math.hypot((player.x) - (prop.x), (player.y) - (prop.y)) < 60;
+            prop.near = Math.hypot((player.x + player.w/2) - (prop.x + 12), (player.y + player.h/2) - (prop.y + 12)) < prop.radius;
         }});
     }}
 
@@ -346,9 +333,9 @@ game_html = f"""
                 ctx.fillStyle = "#1b5e20"; ctx.fillRect(f.x, f.y, f.w, f.h); 
                 ctx.fillStyle = "#1565c0"; ctx.fillRect(f.x+40, f.y+40, f.w-80, f.h-80); 
                 ctx.strokeStyle = "white"; ctx.lineWidth = 4; ctx.strokeRect(f.x+40, f.y+40, f.w-80, f.h-80); 
-                ctx.beginPath(); ctx.moveTo(f.x+40, f.y+f.h/2); ctx.lineTo(f.x+f.w-40, f.y+f.h/2); ctx.stroke(); // Net
+                ctx.beginPath(); ctx.moveTo(f.x+40, f.y+f.h/2); ctx.lineTo(f.x+f.w-40, f.y+f.h/2); ctx.stroke(); 
                 ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.moveTo(f.x+40, f.y+f.h/2-100); ctx.lineTo(f.x+f.w-40, f.y+f.h/2-100); ctx.stroke(); // NVZ
+                ctx.beginPath(); ctx.moveTo(f.x+40, f.y+f.h/2-100); ctx.lineTo(f.x+f.w-40, f.y+f.h/2-100); ctx.stroke(); 
                 ctx.beginPath(); ctx.moveTo(f.x+40, f.y+f.h/2+100); ctx.lineTo(f.x+f.w-40, f.y+f.h/2+100); ctx.stroke(); 
                 ctx.beginPath(); ctx.moveTo(f.x+f.w/2, f.y+40); ctx.lineTo(f.x+f.w/2, f.y+f.h/2-100); ctx.stroke(); 
                 ctx.beginPath(); ctx.moveTo(f.x+f.w/2, f.y+f.h/2+100); ctx.lineTo(f.x+f.w/2, f.y+f.h-40); ctx.stroke(); 
