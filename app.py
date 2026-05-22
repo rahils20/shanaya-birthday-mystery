@@ -52,7 +52,7 @@ game_html = f"""
         background: #1e1e24; border: 3px solid #fdd835; border-radius: 12px; padding: 25px;
         text-align: center; width: 70%; max-width: 500px; z-index: 100; box-shadow: 0px 20px 60px rgba(0,0,0,0.95);
     }}
-    #dialogue-box h2 {{ color: #fdd835; margin-top: 0; font-family: 'Cinzel', serif; }}
+    #dialogue-box h2 {{ color: #fdd835; margin-top: 0; font-family: 'Cinzel', serif; line-height: 1.2;}}
     .btn {{ background: #fdd835; color: #111; border: none; padding: 10px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 16px; margin-top: 15px; width: 100%; }}
     .btn:hover {{ background: #fff176; }}
 
@@ -73,7 +73,7 @@ game_html = f"""
     <canvas id="gameCanvas" width="1000" height="680"></canvas>
     <div id="dialogue-box">
         <h2 id="modal-title">Name</h2>
-        <div id="video-container" style="border-radius: 8px; overflow: hidden;"></div>
+        <div id="video-container" style="border-radius: 8px; overflow: hidden; margin-top: 10px;"></div>
         <p id="modal-text" style="font-size: 18px; color: #eee; margin: 15px 0; font-weight: bold;"></p>
         <button class="btn" onclick="closeModal()">Close & Resume</button>
     </div>
@@ -92,9 +92,10 @@ game_html = f"""
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    const MAP_W = 2800; const MAP_H = 2200;
+    // EXPANDED MAP SIZE
+    const MAP_W = 3200; const MAP_H = 2600;
 
-    const player = {{ x: 1400, y: 1950, w: 24, h: 32, speed: 6 }};
+    const player = {{ x: 1500, y: 2200, w: 24, h: 32, speed: 7 }};
     const keys = {{}};
     let modalOpen = false; let padOpen = false;
 
@@ -107,61 +108,119 @@ game_html = f"""
     function addProp(x, y, title, text) {{ interactables.push({{x, y, w: 24, h: 24, title, text, near: false}}); }}
 
     // 1. Estate Perimeter
-    W(0, 0, MAP_W, 20); W(0, MAP_H-20, 1300, 20); W(1500, MAP_H-20, 1300, 20); 
+    W(0, 0, MAP_W, 20); W(0, MAP_H-20, 1400, 20); W(1600, MAP_H-20, 1600, 20); // Gate at 1400-1600
     W(0, 0, 20, MAP_H); W(MAP_W-20, 0, 20, MAP_H);
 
-    // 2. Mansion Walls
-    W(1200, 400, 400, 20); W(1200, 400, 20, 400); W(1580, 400, 20, 400); // North Wing
-    W(800, 800, 400, 20);  W(800, 800, 20, 400);  W(800, 1180, 400, 20);  // West Wing
-    W(1600, 800, 400, 20); W(1980, 800, 20, 400); W(1600, 1180, 400, 20); // East Wing
-    W(1200, 1580, 150, 20); W(1450, 1580, 150, 20); // Hall Bottom
-    W(1200, 1200, 20, 380); W(1580, 1200, 20, 380); // Hall Sides
-    W(1200, 780, 150, 20); W(1450, 780, 150, 20); // North door
-    W(1180, 800, 20, 150); W(1180, 1050, 20, 150); // West door
-    W(1600, 800, 20, 150); W(1600, 1050, 20, 150); // East door
-    W(800, 980, 300, 20); W(1700, 980, 300, 20); W(1200, 580, 300, 20); 
+    // 2. The Mega Mansion Walls
+    // Bounds: X(600 to 2400), Y(400 to 1800)
+    // Master Suite (North Wing) - HUGE
+    W(1000, 400, 1000, 20); // Top wall
+    W(1000, 400, 20, 400); // Master Left
+    W(2000, 400, 20, 400); // Master Right
+    W(1600, 400, 20, 400); // Split Bed from Bath/WIW
+    W(1600, 600, 400, 20); // Split Bath from WIW
+
+    // West Wing (Kitchen, Dining, Lounge)
+    W(600, 800, 600, 20); // West Top
+    W(600, 800, 20, 1000); // West Left
+    W(600, 1800, 600, 20); // West Bottom
+    W(600, 1100, 600, 20); // Split Kitchen/Dining
+    W(600, 1400, 600, 20); // Split Dining/Lounge
+
+    // East Wing (Library, Study)
+    W(1800, 800, 600, 20); // East Top
+    W(2400, 800, 20, 1000); // East Right
+    W(1800, 1800, 600, 20); // East Bottom
+    W(1800, 1300, 600, 20); // Split Lib/Study
+
+    // Central Grand Hall
+    W(1200, 1800, 150, 20); W(1450, 1800, 150, 20); // Front Doors
+    W(1200, 800, 20, 1000); W(1800, 800, 20, 1000); // Hall Walls
+
+    // Interior Doors (Gaps)
+    // Master
+    W(1200, 780, 150, 20); W(1450, 780, 150, 20); // Master Bed Door
+    W(1580, 500, 20, 80); // Door to WIW
+    W(1580, 700, 20, 80); // Door to Bath
+
+    // West Doors
+    W(1180, 900, 20, 150); // Kitchen Door
+    W(1180, 1200, 20, 150); // Dining Door
+    W(1180, 1550, 20, 150); // Lounge Door
+
+    // East Doors
+    W(1800, 1000, 20, 150); // Library Door
+    W(1800, 1500, 20, 150); // Study Door
 
     // 3. West Garden (Pickleball)
-    addFurn(100, 900, 500, 800, "pickleball", true);
+    addFurn(100, 1000, 450, 700, "pickleball", false);
 
     // 4. East Garden (Pool Deck)
-    addFurn(1900, 1300, 600, 500, "deck", false);
-    addFurn(2000, 1350, 400, 250, "pool", false); // SOLID=FALSE, SHE CAN SWIM!
-    addFurn(2250, 1650, 180, 80, "bar");
-    addFurn(1950, 1650, 60, 90, "deckchair"); addFurn(2050, 1650, 60, 90, "deckchair");
+    addFurn(2450, 900, 700, 800, "deck", false);
+    addFurn(2550, 1000, 400, 400, "pool", false); // Swim enabled
+    addFurn(2850, 1500, 180, 80, "bar");
+    addFurn(2550, 1500, 60, 100, "deckchair"); addFurn(2650, 1500, 60, 100, "deckchair");
 
-    // 5. High-Def Interior Furniture
-    addFurn(880, 830, 150, 60, "kitchen_island"); 
-    addFurn(1100, 830, 60, 80, "fridge");
-    addFurn(920, 1050, 160, 90, "dining_table");   
-    addFurn(1650, 830, 300, 40, "bookshelf");     
-    addFurn(1650, 900, 300, 40, "bookshelf");
-    addFurn(1750, 1080, 140, 70, "desk");          
-    addFurn(1350, 430, 150, 160, "bed");          
-    addFurn(1250, 650, 200, 80, "couch");         
-    addFurn(1280, 740, 140, 80, "rug", false);
-    addFurn(1320, 1250, 140, 120, "piano");       
+    // 5. Advanced Interior Furniture
+    // Master Bedroom
+    addFurn(1250, 450, 200, 220, "bed");
+    addFurn(1050, 650, 150, 80, "couch");
+    addFurn(1150, 480, 60, 40, "nightstand"); addFurn(1480, 480, 60, 40, "nightstand");
+    // WIW
+    addFurn(1650, 420, 300, 50, "wardrobe");
+    addFurn(1650, 530, 250, 50, "clothing_rack");
+    // Bathroom
+    addFurn(1650, 620, 100, 150, "bathtub");
+    addFurn(1850, 620, 120, 60, "vanity");
+    addFurn(1900, 720, 50, 60, "toilet");
 
-    // 6. Glowing Interactable Props
-    addProp(900, 840, "Birthday Cake", "A gorgeous sugar-free chocolate cake from Ritual Cafe! Looks delicious.");
-    addProp(1950, 1600, "Poolside Items", "A bottle of Isdin Fusion Water sunscreen and a Garmin smartwatch left on the deck.");
-    addProp(940, 840, "Warm Food", "A freshly cooked wok of Egg Schezwan Fried Rice from Kuai Kitchen is sitting on the stove.");
+    // Kitchen
+    addFurn(800, 950, 200, 80, "kitchen_island"); 
+    addFurn(620, 820, 60, 100, "fridge");
+    addFurn(620, 950, 60, 120, "counters");
+    
+    // Dining
+    addFurn(750, 1200, 300, 120, "dining_table");   
+    
+    // Lounge
+    addFurn(800, 1500, 250, 100, "lounge_sofa");
+    addFurn(850, 1620, 150, 80, "coffee_table");
+
+    // Library
+    addFurn(2100, 820, 40, 400, "bookshelf_vert");     
+    addFurn(1850, 1150, 300, 40, "bookshelf");
+    addFurn(1900, 950, 100, 100, "reading_chair");
+
+    // Study
+    addFurn(2000, 1450, 160, 80, "desk");          
+    addFurn(2200, 1450, 60, 60, "plant");
+    
+    // Hall
+    addFurn(1300, 1450, 180, 140, "piano");       
+    addFurn(1300, 850, 400, 900, "red_carpet", false);
+
+    // 6. Hyper-Personalized Glowing Props
+    addProp(900, 970, "Birthday Cake", "A gorgeous Paleo Bakes sugar-free chocolate cake! Looks absolutely delicious.");
+    addProp(1850, 640, "Vanity Setup", "A very specific skincare regimen: CeraVe face wash for normal to oily skin, Tretinoin 0.025, and Isdin Fusion Water sunscreen.");
+    addProp(1700, 440, "Wardrobe Setup", "A neat row of custom Bombay Shirt Company shirts and several pairs of Brooks Running shoes.");
+    addProp(850, 1230, "Warm Food", "A massive, fresh order of Egg Schezwan Fried Rice from Kuai Kitchen.");
+    addProp(2600, 1520, "Poolside Items", "A Garmin smartwatch and some Speedo swimming gear left by the water.");
     
     // 7. Garden Trees
-    for(let i=0; i<60; i++) {{
-        let tx = 100 + Math.random()*2600; let ty = 100 + Math.random()*2000;
-        if(tx > 700 && tx < 2100 && ty > 300 && ty < 1650) continue; 
-        if(tx > 1800 && ty > 1200) continue; 
-        if(tx < 700 && ty > 800) continue; // Keep off pickleball
-        if(tx > 1300 && tx < 1500 && ty > 1800) continue; 
+    for(let i=0; i<80; i++) {{
+        let tx = 100 + Math.random()*3000; let ty = 100 + Math.random()*2400;
+        if(tx > 500 && tx < 2500 && ty > 300 && ty < 1900) continue; 
+        if(tx > 2400 && ty > 800) continue; 
+        if(tx < 600 && ty > 900 && ty < 1800) continue; 
+        if(tx > 1300 && tx < 1700 && ty > 1800) continue; 
         addFurn(tx, ty, 60, 60, "tree");
     }}
 
     // Spawn NPCs
     rawNpcs.forEach(data => {{
-        let nx = 900 + Math.random()*1000; let ny = 500 + Math.random()*1000;
-        if(Math.random() < 0.2) {{ nx = 2000 + Math.random()*400; ny = 1300 + Math.random()*400; }} // Pool
-        if(Math.random() < 0.1) {{ nx = 200 + Math.random()*300; ny = 1000 + Math.random()*500; }} // Pickleball
+        let nx = 1300 + Math.random()*400; let ny = 1000 + Math.random()*600;
+        if(Math.random() < 0.2) {{ nx = 2600 + Math.random()*200; ny = 1000 + Math.random()*300; }} 
+        if(Math.random() < 0.1) {{ nx = 200 + Math.random()*200; ny = 1200 + Math.random()*300; }} 
         npcs.push({{ x: nx, y: ny, w: 24, h: 32, data: data, vx: 0, vy: 0, timer: 0 }});
     }});
 
@@ -185,13 +244,15 @@ game_html = f"""
     }}
 
     function getRoom(px, py) {{
-        if(px > 800 && px < 1200 && py > 800 && py < 1000) return "Kitchen";
-        if(px > 800 && px < 1200 && py > 1000 && py < 1200) return "Dining";
-        if(px > 1600 && px < 2000 && py > 800 && py < 1000) return "Library";
-        if(px > 1600 && px < 2000 && py > 1000 && py < 1200) return "Study";
-        if(px > 1200 && px < 1600 && py > 400 && py < 600) return "MasterBed";
-        if(px > 1200 && px < 1600 && py > 600 && py < 800) return "Lounge";
-        if(px > 1200 && px < 1600 && py > 800 && py < 1600) return "Hall";
+        if(px > 600 && px < 1200 && py > 800 && py < 1100) return "Kitchen";
+        if(px > 600 && px < 1200 && py > 1100 && py < 1400) return "Dining";
+        if(px > 600 && px < 1200 && py > 1400 && py < 1800) return "Lounge";
+        if(px > 1800 && px < 2400 && py > 800 && py < 1300) return "Library";
+        if(px > 1800 && px < 2400 && py > 1300 && py < 1800) return "Study";
+        if(px > 1000 && px < 1600 && py > 400 && py < 800) return "MasterBed";
+        if(px > 1600 && px < 2000 && py > 400 && py < 600) return "WIW";
+        if(px > 1600 && px < 2000 && py > 600 && py < 800) return "Bathroom";
+        if(px > 1200 && px < 1800 && py > 800 && py < 1800) return "Hall";
         return "Garden";
     }}
 
@@ -226,9 +287,12 @@ game_html = f"""
         }});
     }}
 
-    // --- DRAWING WITH ARCHITECTURAL DETAIL ---
+    // --- DRAWING WITH ADVANCED CANVAS SHADING ---
     function drawCharacter(x, y, color, name, isPlayer=false) {{
+        ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
         ctx.fillStyle = color; ctx.fillRect(x, y+10, 24, 22); 
+        ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+        
         ctx.fillStyle = '#FFDDC1'; ctx.beginPath(); ctx.arc(x+12, y+8, 10, 0, Math.PI*2); ctx.fill(); 
         ctx.fillStyle = 'black'; ctx.beginPath(); ctx.arc(x+8, y+6, 2, 0, Math.PI*2); ctx.fill(); 
         ctx.beginPath(); ctx.arc(x+16, y+6, 2, 0, Math.PI*2); ctx.fill();
@@ -246,88 +310,113 @@ game_html = f"""
         let camY = canvas.height/2 - (player.y + player.h/2);
         ctx.translate(camX, camY);
 
-        ctx.fillStyle = "#6B4423"; ctx.fillRect(1350, 1580, 100, 620); // Path
+        ctx.fillStyle = "#6B4423"; ctx.fillRect(1450, 1780, 100, 820); // Path
         ctx.fillStyle = "#111"; 
-        ctx.fillRect(1280, MAP_H-30, 40, 40); ctx.fillRect(1480, MAP_H-30, 40, 40); // Gate Pillars
-        ctx.fillStyle = "#333"; ctx.fillRect(1320, MAP_H-15, 160, 10); // Gate
+        ctx.fillRect(1380, MAP_H-30, 40, 40); ctx.fillRect(1580, MAP_H-30, 40, 40); // Gate Pillars
+        ctx.fillStyle = "#333"; ctx.fillRect(1420, MAP_H-15, 160, 10); // Gate
 
-        ctx.fillStyle = "#8b5a2b"; // Floors
-        ctx.fillRect(1200, 400, 400, 400); ctx.fillRect(800, 800, 1200, 400); ctx.fillRect(1200, 1200, 400, 380); 
+        // Mansion Floors
+        ctx.fillStyle = "#8b5a2b"; 
+        ctx.fillRect(1000, 400, 1000, 400); // North
+        ctx.fillRect(600, 800, 1800, 1000); // West/East/Hall
+        
+        // Bathroom/WIW Tiles
+        ctx.fillStyle = "#cfd8dc"; ctx.fillRect(1600, 400, 400, 400); 
 
         ctx.fillStyle = "#1a1a1a";
-        ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 10;
+        ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 12;
         walls.forEach(w => ctx.fillRect(w.x, w.y, w.w, w.h));
         ctx.shadowBlur = 0;
 
         // HIGH-DEF FURNITURE RENDERING
         furniture.forEach(f => {{
+            ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
+            
             if(f.type === "pool") {{
-                ctx.fillStyle = '#f5f5f5'; ctx.fillRect(f.x-8, f.y-8, f.w+16, f.h+16); // Coping
-                ctx.fillStyle = '#0288d1'; ctx.fillRect(f.x, f.y, f.w, f.h); // Water
-                ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 2; // Water lines
-                ctx.beginPath(); ctx.moveTo(f.x+20, f.y+20); ctx.lineTo(f.x+100, f.y+40); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(f.x+f.w-100, f.y+f.h-40); ctx.lineTo(f.x+f.w-20, f.y+f.h-20); ctx.stroke();
-                ctx.fillStyle = "#e91e63"; ctx.beginPath(); ctx.arc(f.x+f.w/2, f.y+f.h/2, 25, 0, Math.PI*2); ctx.fill(); // Float
-                ctx.fillStyle = "#0288d1"; ctx.beginPath(); ctx.arc(f.x+f.w/2, f.y+f.h/2, 12, 0, Math.PI*2); ctx.fill(); 
+                ctx.fillStyle = '#e0e0e0'; ctx.fillRect(f.x-10, f.y-10, f.w+20, f.h+20); 
+                let grad = ctx.createLinearGradient(f.x, f.y, f.x+f.w, f.y+f.h);
+                grad.addColorStop(0, '#00a8ff'); grad.addColorStop(1, '#0097e6');
+                ctx.fillStyle = grad; ctx.fillRect(f.x, f.y, f.w, f.h); 
+                ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 3; 
+                ctx.beginPath(); ctx.moveTo(f.x+40, f.y+40); ctx.lineTo(f.x+150, f.y+60); ctx.stroke();
             }}
             else if(f.type === "pickleball") {{
-                ctx.fillStyle = "#1b5e20"; ctx.fillRect(f.x, f.y, f.w, f.h); // Green outer
-                ctx.fillStyle = "#1565c0"; ctx.fillRect(f.x+40, f.y+40, f.w-80, f.h-80); // Blue Inner
-                ctx.strokeStyle = "white"; ctx.lineWidth = 4; ctx.strokeRect(f.x+40, f.y+40, f.w-80, f.h-80); // Bounds
+                ctx.fillStyle = "#1b5e20"; ctx.fillRect(f.x, f.y, f.w, f.h); 
+                ctx.fillStyle = "#1565c0"; ctx.fillRect(f.x+40, f.y+40, f.w-80, f.h-80); 
+                ctx.strokeStyle = "white"; ctx.lineWidth = 4; ctx.strokeRect(f.x+40, f.y+40, f.w-80, f.h-80); 
                 ctx.beginPath(); ctx.moveTo(f.x+40, f.y+f.h/2); ctx.lineTo(f.x+f.w-40, f.y+f.h/2); ctx.stroke(); // Net
                 ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.moveTo(f.x+40, f.y+f.h/2-80); ctx.lineTo(f.x+f.w-40, f.y+f.h/2-80); ctx.stroke(); // Top NVZ
-                ctx.beginPath(); ctx.moveTo(f.x+40, f.y+f.h/2+80); ctx.lineTo(f.x+f.w-40, f.y+f.h/2+80); ctx.stroke(); // Bottom NVZ
-                ctx.beginPath(); ctx.moveTo(f.x+f.w/2, f.y+40); ctx.lineTo(f.x+f.w/2, f.y+f.h/2-80); ctx.stroke(); // Center top
-                ctx.beginPath(); ctx.moveTo(f.x+f.w/2, f.y+f.h/2+80); ctx.lineTo(f.x+f.w/2, f.y+f.h-40); ctx.stroke(); // Center bot
+                ctx.beginPath(); ctx.moveTo(f.x+40, f.y+f.h/2-100); ctx.lineTo(f.x+f.w-40, f.y+f.h/2-100); ctx.stroke(); // NVZ
+                ctx.beginPath(); ctx.moveTo(f.x+40, f.y+f.h/2+100); ctx.lineTo(f.x+f.w-40, f.y+f.h/2+100); ctx.stroke(); 
+                ctx.beginPath(); ctx.moveTo(f.x+f.w/2, f.y+40); ctx.lineTo(f.x+f.w/2, f.y+f.h/2-100); ctx.stroke(); 
+                ctx.beginPath(); ctx.moveTo(f.x+f.w/2, f.y+f.h/2+100); ctx.lineTo(f.x+f.w/2, f.y+f.h-40); ctx.stroke(); 
             }}
             else if(f.type === "deck") {{ ctx.fillStyle = '#d4a373'; ctx.fillRect(f.x, f.y, f.w, f.h); }}
             else if(f.type === "bar") {{
                 ctx.fillStyle = '#5d4037'; ctx.fillRect(f.x, f.y, f.w, f.h);
-                ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(f.x+30, f.y-15, 12, 0, Math.PI*2); ctx.fill(); 
-                ctx.beginPath(); ctx.arc(f.x+90, f.y-15, 12, 0, Math.PI*2); ctx.fill();
-                ctx.beginPath(); ctx.arc(f.x+150, f.y-15, 12, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(f.x+30, f.y-15, 15, 0, Math.PI*2); ctx.fill(); 
+                ctx.beginPath(); ctx.arc(f.x+90, f.y-15, 15, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(f.x+150, f.y-15, 15, 0, Math.PI*2); ctx.fill();
             }}
             else if(f.type === "deckchair") {{ ctx.fillStyle = '#fff'; ctx.fillRect(f.x, f.y, f.w, f.h); ctx.fillStyle = '#03a9f4'; ctx.fillRect(f.x+5, f.y+5, f.w-10, f.h-10);}}
             else if(f.type === "dining_table") {{
-                ctx.fillStyle = '#4A2311'; ctx.fillRect(f.x,f.y,f.w,f.h);
-                ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(f.x+30, f.y+20, 10, 0, Math.PI*2); ctx.fill();
-                ctx.beginPath(); ctx.arc(f.x+80, f.y+20, 10, 0, Math.PI*2); ctx.fill();
-                ctx.beginPath(); ctx.arc(f.x+130, f.y+20, 10, 0, Math.PI*2); ctx.fill();
-                ctx.beginPath(); ctx.arc(f.x+30, f.y+70, 10, 0, Math.PI*2); ctx.fill();
-                ctx.beginPath(); ctx.arc(f.x+80, f.y+70, 10, 0, Math.PI*2); ctx.fill();
-                ctx.beginPath(); ctx.arc(f.x+130, f.y+70, 10, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#3E2723'; ctx.fillRect(f.x,f.y,f.w,f.h);
+                ctx.fillStyle = 'white'; 
+                for(let i=0; i<4; i++) {{
+                    ctx.beginPath(); ctx.arc(f.x+40 + (i*70), f.y+20, 12, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(f.x+40 + (i*70), f.y+100, 12, 0, Math.PI*2); ctx.fill();
+                }}
             }}
             else if(f.type === "bed") {{
-                ctx.fillStyle = '#3e2723'; ctx.fillRect(f.x,f.y,f.w,f.h); // Frame
-                ctx.fillStyle = '#fafafa'; ctx.fillRect(f.x+8,f.y+8,f.w-16,f.h-16); // Mattress
-                ctx.fillStyle = '#e0e0e0'; ctx.fillRect(f.x+15,f.y+15,50,30); ctx.fillRect(f.x+85,f.y+15,50,30); // Pillows
-                ctx.fillStyle = '#1565c0'; ctx.fillRect(f.x+8,f.y+60,f.w-16,f.h-68); // Blanket
+                ctx.fillStyle = '#3e2723'; ctx.fillRect(f.x,f.y,f.w,f.h); 
+                ctx.fillStyle = '#fafafa'; ctx.fillRect(f.x+8,f.y+8,f.w-16,f.h-16); 
+                ctx.fillStyle = '#e0e0e0'; ctx.fillRect(f.x+20,f.y+20,60,40); ctx.fillRect(f.x+120,f.y+20,60,40); 
+                ctx.fillStyle = '#1565c0'; ctx.fillRect(f.x+8,f.y+80,f.w-16,f.h-88); 
             }}
             else if(f.type === "kitchen_island") {{
-                ctx.fillStyle = '#eceff1'; ctx.fillRect(f.x,f.y,f.w,f.h); // Marble
-                ctx.fillStyle = '#37474f'; ctx.fillRect(f.x+15,f.y+15,40,30); // Stove
-                ctx.fillStyle = '#ff5252'; ctx.beginPath(); ctx.arc(f.x+25, f.y+30, 6, 0, Math.PI*2); ctx.fill(); // Burner
-                ctx.fillStyle = '#b0bec5'; ctx.fillRect(f.x+90,f.y+15,40,30); // Sink
-                ctx.fillStyle = '#03a9f4'; ctx.beginPath(); ctx.arc(f.x+110, f.y+30, 4, 0, Math.PI*2); ctx.fill(); // Water
+                ctx.fillStyle = '#eceff1'; ctx.fillRect(f.x,f.y,f.w,f.h); 
+                ctx.fillStyle = '#37474f'; ctx.fillRect(f.x+20,f.y+20,50,40); 
+                ctx.fillStyle = '#ff5252'; ctx.beginPath(); ctx.arc(f.x+35, f.y+40, 8, 0, Math.PI*2); ctx.fill(); 
+                ctx.fillStyle = '#b0bec5'; ctx.fillRect(f.x+120,f.y+20,50,40); 
             }}
-            else if(f.type === "couch") {{
+            else if(f.type === "lounge_sofa") {{
                 ctx.fillStyle = '#455a64'; ctx.fillRect(f.x,f.y,f.w,f.h);
-                ctx.fillStyle = '#37474f'; ctx.fillRect(f.x,f.y,20,f.h); ctx.fillRect(f.x+f.w-20,f.y,20,f.h);
+                ctx.fillStyle = '#37474f'; ctx.fillRect(f.x,f.y,25,f.h); ctx.fillRect(f.x+f.w-25,f.y,25,f.h); ctx.fillRect(f.x,f.y,f.w,25);
+            }}
+            else if(f.type === "bathtub") {{
+                ctx.fillStyle = 'white'; ctx.beginPath(); ctx.roundRect(f.x, f.y, f.w, f.h, 20); ctx.fill();
+                ctx.fillStyle = '#e0e0e0'; ctx.beginPath(); ctx.roundRect(f.x+10, f.y+10, f.w-20, f.h-20, 15); ctx.fill();
+                ctx.fillStyle = 'silver'; ctx.beginPath(); ctx.arc(f.x+f.w/2, f.y+20, 5, 0, Math.PI*2); ctx.fill();
+            }}
+            else if(f.type === "vanity") {{
+                ctx.fillStyle = '#5D4037'; ctx.fillRect(f.x, f.y, f.w, f.h);
+                ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(f.x+f.w/2, f.y+f.h/2, 15, 0, Math.PI*2); ctx.fill();
+            }}
+            else if(f.type === "toilet") {{
+                ctx.fillStyle = 'white'; ctx.fillRect(f.x, f.y, f.w, 20);
+                ctx.beginPath(); ctx.arc(f.x+f.w/2, f.y+40, 20, 0, Math.PI*2); ctx.fill();
+            }}
+            else if(f.type === "wardrobe") {{ ctx.fillStyle = '#4E342E'; ctx.fillRect(f.x, f.y, f.w, f.h); }}
+            else if(f.type === "clothing_rack") {{
+                ctx.fillStyle = '#757575'; ctx.fillRect(f.x, f.y+f.h/2-2, f.w, 4);
+                ctx.fillStyle = '#c62828'; ctx.fillRect(f.x+20, f.y+10, 10, 30); ctx.fillStyle = '#1565c0'; ctx.fillRect(f.x+40, f.y+10, 10, 30);
             }}
             else if(f.type === "tree") {{
-                ctx.fillStyle = '#2e7d32'; ctx.beginPath(); ctx.arc(f.x+30,f.y+30,40,0,Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#2e7d32'; ctx.beginPath(); ctx.arc(f.x+30,f.y+30,45,0,Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#1b5e20'; ctx.beginPath(); ctx.arc(f.x+30,f.y+30,25,0,Math.PI*2); ctx.fill();
             }}
             else {{ ctx.fillStyle = '#555'; ctx.fillRect(f.x,f.y,f.w,f.h); }}
+            
+            ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
         }});
 
         // Room Labels
-        ctx.fillStyle = "rgba(255,255,255,0.4)"; ctx.font = "bold 35px 'Nunito'"; ctx.textAlign="center";
-        ctx.fillText("MASTER BEDROOM", 1400, 500); ctx.fillText("LOUNGE", 1400, 700);
-        ctx.fillText("KITCHEN", 1000, 900); ctx.fillText("DINING", 1000, 1100);
-        ctx.fillText("LIBRARY", 1800, 900); ctx.fillText("STUDY", 1800, 1100);
-        ctx.fillText("GRAND HALL", 1400, 1300); ctx.fillText("PICKLEBALL COURT", 350, 1350);
+        ctx.fillStyle = "rgba(255,255,255,0.4)"; ctx.font = "bold 40px 'Nunito'"; ctx.textAlign="center";
+        ctx.fillText("MASTER BEDROOM", 1300, 600); 
+        ctx.fillText("BATHROOM", 1800, 720); ctx.fillText("WALK-IN", 1800, 520);
+        ctx.fillText("KITCHEN", 900, 950); ctx.fillText("DINING", 900, 1250); ctx.fillText("LOUNGE", 900, 1600);
+        ctx.fillText("LIBRARY", 2100, 1050); ctx.fillText("STUDY", 2100, 1550);
+        ctx.fillText("GRAND HALL", 1500, 1300); ctx.fillText("PICKLEBALL COURT", 350, 1400);
 
         // Pulsating Interactive Props
         let pulse = Math.sin(Date.now() / 150) * 4;
@@ -351,15 +440,17 @@ game_html = f"""
         ctx.fillStyle = "rgba(0, 0, 0, 0.65)"; 
 
         if (pRoom === "Garden") {{
-            ctx.fillRect(800, 400, 1200, 1180); 
+            ctx.fillRect(600, 400, 1800, 1400); 
         }} else {{
-            if (pRoom !== "Kitchen") ctx.fillRect(800, 800, 400, 200);
-            if (pRoom !== "Dining") ctx.fillRect(800, 1000, 400, 180);
-            if (pRoom !== "Library") ctx.fillRect(1600, 800, 400, 200);
-            if (pRoom !== "Study") ctx.fillRect(1600, 1000, 400, 180);
-            if (pRoom !== "MasterBed") ctx.fillRect(1200, 400, 400, 200);
-            if (pRoom !== "Lounge") ctx.fillRect(1200, 600, 400, 200);
-            if (pRoom !== "Hall") ctx.fillRect(1200, 800, 400, 780); 
+            if (pRoom !== "Kitchen") ctx.fillRect(600, 800, 600, 300);
+            if (pRoom !== "Dining") ctx.fillRect(600, 1100, 600, 300);
+            if (pRoom !== "Lounge") ctx.fillRect(600, 1400, 600, 400);
+            if (pRoom !== "Library") ctx.fillRect(1800, 800, 600, 500);
+            if (pRoom !== "Study") ctx.fillRect(1800, 1300, 600, 500);
+            if (pRoom !== "MasterBed") ctx.fillRect(1000, 400, 600, 400);
+            if (pRoom !== "WIW") ctx.fillRect(1600, 400, 400, 200);
+            if (pRoom !== "Bathroom") ctx.fillRect(1600, 600, 400, 200);
+            if (pRoom !== "Hall") ctx.fillRect(1200, 800, 600, 1000); 
         }}
         ctx.restore(); 
     }}
@@ -402,7 +493,7 @@ game_html = f"""
     function initPad() {{
         const s = {json.dumps(["Rahul", "Aditi", "Karan", "Prof. Aris", "Mme. Elara", "Maanav", "Divya", "Sarthak"])};
         const w = {json.dumps(["Candlestick", "Poison", "Rope", "Axe", "Dagger"])};
-        const r = {json.dumps(["Kitchen", "Dining", "Library", "Study", "Lounge", "MasterBed", "Grand Hall"])};
+        const r = {json.dumps(["Kitchen", "Dining", "Library", "Study", "Lounge", "MasterBed", "Bathroom", "WIW", "Grand Hall"])};
         
         function buildCol(id, list, prefix) {{
             let col = document.getElementById(id);
@@ -435,7 +526,7 @@ st.divider()
 
 col1, col2, col3 = st.columns(3)
 with col1: guess_who = st.selectbox("Suspect", ["Select", "Maanav", "Anoushka", "Divya", "Sarthak", "Rahil"])
-with col2: guess_where = st.selectbox("Location", ["Select", "Kitchen", "Dining", "Library", "Study", "MasterBed", "Lounge", "Grand Hall"])
+with col2: guess_where = st.selectbox("Location", ["Select", "Kitchen", "Dining", "Library", "Study", "MasterBed", "Lounge", "Bathroom", "WIW", "Grand Hall"])
 with col3: guess_weapon = st.selectbox("Weapon", ["Select", "Candlestick", "Poison", "Rope", "Axe", "Dagger"])
     
 if st.button("MAKE ACCUSATION", use_container_width=True, type="primary"):
