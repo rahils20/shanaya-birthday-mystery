@@ -1,6 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import json
+import random
 
 st.set_page_config(page_title="Shanaya's Birthday Mystery", layout="wide")
 
@@ -16,40 +17,42 @@ st.markdown("""
 st.markdown("<h1>SHANAYA'S MYSTERY</h1>", unsafe_allow_html=True)
 st.markdown("<div class='instruction'><b>WASD/Arrows</b> to move | <b>Spacebar</b> to talk/inspect | <b>C</b> for Case File</div>", unsafe_allow_html=True)
 
-# --- 1. THE WEB OF CLUES (50% Hints, 50% Distractions) ---
+# --- 1. GUEST LIST & NPC DATABASE (27 Characters) ---
+colors = ["#e50914", "#9c27b0", "#3f51b5", "#009688", "#ff9800", "#795548", "#607d8b", "#e91e63", "#00bcd4", "#cddc39", "#ff5722"]
+
 npcs_data = [
-    # THE HINTS (The Logic Puzzle)
-    {"name": "Divya", "clue": "I was reading in the Library at 11:30 PM. The heavy brass candlestick was definitely on the desk then. By 12:15 AM, it was gone.", "color": "#00bcd4"},
-    {"name": "Sarthak", "clue": "I was playing pickleball from 11:30 to 12:30. Nobody came into the West Garden with a cake.", "color": "#ff5722"},
-    {"name": "Anoushka", "clue": "I was grabbing a drink near the Dining Room right around midnight. Heard a massive thud from the Kitchen.", "color": "#009688"},
-    {"name": "Maanav", "clue": "Happy Birthday! Honestly, I'm exhausted. I hit a massive tempo sprint session today and my macros are completely depleted. But I don't eat sugar, obviously.", "color": "#3f51b5"},
-    {"name": "Pareen", "clue": "I saw Maanav earlier. He was staring at the dessert menu on his phone. Thought he was doing strict Keto?", "color": "#e91e63"},
-    {"name": "Kabeer", "clue": "I was in the Hallway at midnight. I didn't see anyone go towards the Master Bedroom or the Bathrooms.", "color": "#795548"},
-    {"name": "Alicia", "clue": "I noticed the Kitchen doors were closed around midnight. Someone was definitely hiding in there.", "color": "#cddc39"},
-    {"name": "Manav T", "clue": "Whoever did it must have used something to pry open the fridge lock. Something heavy and brass?", "color": "#ff9800"},
-    {"name": "Alisha", "clue": "I saw a shadow moving fast from the Library towards the Kitchen at 11:50 PM.", "color": "#9c27b0"},
-    {"name": "Sharvil", "clue": "Check the icing smear. It leads away from the Kitchen, but it stops abruptly. The thief must have stayed indoors to eat it.", "color": "#e50914"},
-    {"name": "Samira", "clue": "I noticed Maanav wasn't with the pool crew OR the pickleball crew at midnight. Where was he?", "color": "#e91e63"},
-    {"name": "Mandira", "clue": "If you get stuck, remember there's a security computer in the Lounge that logs everyone's statements.", "color": "#e50914"},
-    
-    # THE FUN DISTRACTIONS / ALIBIS
-    {"name": "Selina", "clue": "Happy Birthday Shanaya! Hope you're having the best night!", "color": "#9c27b0"},
-    {"name": "Shlokk", "clue": "I didn't do it! I've been doing cannonballs into the pool for the last hour.", "color": "#ff9800"},
-    {"name": "Panthiv", "clue": "Bro, this party is insane. Happy Birthday!", "color": "#607d8b"},
-    {"name": "Ishika", "clue": "You look gorgeous tonight Shanaya! Happy Birthday!", "color": "#00bcd4"},
-    {"name": "Kshitija", "clue": "Happy Birthday Shanaya! Let's celebrate properly soon. Keep investigating!", "color": "#e91e63"},
-    {"name": "Sahil", "clue": "I'm just here for the free drinks. Happy B-Day!", "color": "#ff5722"},
-    {"name": "Dua", "clue": "Did someone say there was cake? I wanted a piece! Happy Birthday!", "color": "#e91e63"},
-    {"name": "Rhea", "clue": "Happy Birthday Shanaya! Can we go swimming now?", "color": "#cddc39"},
-    {"name": "Jai", "clue": "Pool party is where it's at! We've been here all night.", "color": "#3f51b5"},
-    {"name": "Ryan", "clue": "Happy Birthday! I've literally just been wandering around looking for the bathroom.", "color": "#607d8b"},
-    {"name": "Shranay", "clue": "Best birthday party ever. I'm having a blast.", "color": "#795548"},
-    {"name": "Rahil", "clue": "Hey babe! I hope you're having fun. I left a surprise for you on the Lounge computer once you talk to everyone.", "color": "#ff5722"}
+    {"name": "Rahil", "clue": "Hey babe! I locked the CCTV computer in the Lounge to keep the footage safe. Some of the items I have been using store some secret information. Find the 3 numbers to unlock it!"},
+    {"name": "Maanav", "clue": "Happy Birthday! Honestly, I hit a massive tempo sprint session today and my macros are completely depleted. I'd kill for some carbs right now."},
+    {"name": "Divya", "clue": "I was in the Library at 11:30 PM. The heavy brass candlestick was on the desk. By 12:15 AM, it was missing!"},
+    {"name": "Sarthak", "clue": "I've been playing pickleball outside since 11 PM. Nobody came into the West Garden with a cake, so the crime definitely happened indoors."},
+    {"name": "Anoushka", "clue": "I was grabbing a drink near the Dining Room right around midnight. I heard a loud crash coming from the Kitchen. And I saw wet footprints!"},
+    {"name": "Alicia", "clue": "Did you see the Dining Room table? There are empty boxes of Sushi. The delivery guy left a weird note: 'Subtract the number of sushi boxes (3) from the delivery hour (23:00).'"},
+    {"name": "Manav T", "clue": "I saw someone sprinting away from the West Wing in the dark. I couldn't see their face, but the screen on their Whoop strap was glowing."},
+    {"name": "Selina", "clue": "A Whoop strap? That's interesting. Maanav and Shlokk are the only ones here obsessed with tracking their recovery on their Whoops."},
+    {"name": "Panthiv", "clue": "Pool party is where it's at! Me and Shlokk have been in the water since 10 PM. He hasn't left the pool deck."},
+    {"name": "Shlokk", "clue": "I didn't do it! Yes, I was wearing my Whoop, but Panthiv and I have been doing cannonballs since 11 PM! Look at my hair, it's soaking wet."},
+    {"name": "Kshitija", "clue": "It's true, Shlokk hasn't left the pool. But I noticed Maanav wasn't with us OR the pickleball crew at midnight. Where was he?"},
+    {"name": "Pareen", "clue": "I saw Maanav earlier staring at the dessert menu on his phone. I thought he was doing strict Keto?"},
+    {"name": "Alisha", "clue": "Whoever broke the lock on the cake fridge must have used something super heavy and blunt. Definitely not a knife or a dagger."},
+    {"name": "Ishika", "clue": "I was dropping my bag in the Master Bedroom. Did you see the graduation photo? The note on it said 'The day we celebrated.' When did you graduate again? June what?"},
+    {"name": "Mandira", "clue": "I was just touching up my makeup in the Bathroom. Did you notice the sticky note on your Bum Bum Cream? It said: 'The iconic scent number on the front of the tub.'"},
+    {"name": "Mom", "clue": "Shanaya beta, you look so beautiful! Please be careful walking in the Hallway, someone spilled a massive cooler of ice water right in the middle around 11:30 PM."},
+    {"name": "Dadu", "clue": "Is it time for dinner yet? All this running around is making me dizzy. Happy Birthday, beta!"},
+    {"name": "Dad", "clue": "Happy Birthday Shanaya! Has anyone seen my glasses? I can't read this menu."},
+    {"name": "Suchi", "clue": "Omg this party is so aesthetic! Need to take some pictures for the gram. Happy Birthday!"},
+    {"name": "Miloni", "clue": "Happy birthday girl!! Love the decor in here."},
+    {"name": "Rahil Patel", "clue": "Great party! The food is amazing. Happy Birthday!"},
+    {"name": "Shlok patel", "clue": "Are we playing pickleball later? Happy Birthday Shanaya!"},
+    {"name": "Sahil", "clue": "I'm just here for the free drinks. Happy B-Day!"},
+    {"name": "Dua", "clue": "Did someone say there was cake? I wanted a piece! Happy Birthday!"},
+    {"name": "Rhea", "clue": "Happy Birthday Shanaya! Can we go swimming now?"},
+    {"name": "Ryan", "clue": "Happy Birthday! I've literally just been wandering around looking for the bathroom."},
+    {"name": "Shranay", "clue": "Best birthday party ever. I'm having a blast."}
 ]
 
-# Ensure every guest gets a placeholder video link
 for npc in npcs_data:
-    npc["video"] = "https://www.youtube.com/embed/dQw4w9WgXcQ"
+    npc["color"] = random.choice(colors)
+    npc["video"] = "https://www.youtube.com/embed/dQw4w9WgXcQ" 
 
 all_names_json = json.dumps([n["name"] for n in npcs_data])
 
@@ -89,7 +92,7 @@ game_html = f"""
 
 <div id="game-container">
     <canvas id="gameCanvas" width="1000" height="680"></canvas>
-    <div id="progress-tracker">Guests Interrogated: <span id="guest-count">0</span>/24</div>
+    <div id="progress-tracker">Guests Interrogated: <span id="guest-count">0</span>/27</div>
     
     <div id="dialogue-box">
         <h2 id="modal-title">Name</h2>
@@ -117,10 +120,9 @@ game_html = f"""
     const keys = {{}};
     let modalOpen = false; let padOpen = false;
     
-    // PROGRESS TRACKING
     const interrogatedGuests = new Set();
     const allNamesList = {all_names_json};
-    const TOTAL_GUESTS = 24;
+    const TOTAL_GUESTS = 27;
 
     const rawNpcs = {json.dumps(npcs_data)};
     const npcs = [];
@@ -130,89 +132,57 @@ game_html = f"""
     function addFurn(x, y, w, h, type, solid=true) {{ furniture.push({{x, y, w, h, type, solid}}); }}
     function addProp(x, y, title, text, type="prop", radius=130) {{ interactables.push({{x, y, w: 24, h: 24, title, text, type, radius, near: false}}); }}
 
-    // --- FLAWLESS ARCHITECTURAL WALLS ---
+    // --- ARCHITECTURE ---
     W(0, 0, MAP_W, 20); W(0, MAP_H-20, 1400, 20); W(1600, MAP_H-20, 1600, 20); 
     W(0, 0, 20, MAP_H); W(MAP_W-20, 0, 20, MAP_H);
+    W(1000, 400, 1000, 20); W(1000, 400, 20, 380); W(1980, 400, 20, 380);  
+    W(1000, 780, 300, 20); W(1450, 780, 550, 20);  
+    W(1600, 420, 20, 80); W(1600, 600, 20, 50); W(1600, 730, 20, 50); W(1620, 600, 360, 20);  
+    W(600, 800, 400, 20); W(600, 800, 20, 1000); W(600, 1800, 600, 20);  
+    W(620, 1100, 560, 20); W(620, 1400, 560, 20);  
+    W(1180, 800, 20, 100); W(1180, 1050, 20, 150); W(1180, 1350, 20, 200); W(1180, 1700, 20, 100); 
+    W(1800, 800, 600, 20); W(2380, 800, 20, 1000); W(1800, 1800, 600, 20); W(1820, 1300, 560, 20); 
+    W(1800, 800, 20, 200); W(1800, 1150, 20, 350); W(1800, 1650, 20, 150); 
+    W(1200, 1800, 200, 20); W(1600, 1800, 200, 20); 
 
-    W(1000, 400, 1000, 20); 
-    W(1000, 400, 20, 380);  
-    W(1980, 400, 20, 380);  
-    W(1000, 780, 300, 20);  
-    W(1450, 780, 550, 20);  
-
-    W(1600, 420, 20, 80);   
-    W(1600, 600, 20, 50);   
-    W(1600, 730, 20, 50);   
-    W(1620, 600, 360, 20);  
-
-    W(600, 800, 400, 20);   
-    W(600, 800, 20, 1000);  
-    W(600, 1800, 600, 20);  
-    W(620, 1100, 560, 20);  
-    W(620, 1400, 560, 20);  
-
-    W(1180, 800, 20, 100);  
-    W(1180, 1050, 20, 150); 
-    W(1180, 1350, 20, 200); 
-    W(1180, 1700, 20, 100); 
-
-    W(1800, 800, 600, 20);  
-    W(2380, 800, 20, 1000); 
-    W(1800, 1800, 600, 20); 
-    W(1820, 1300, 560, 20); 
-
-    W(1800, 800, 20, 200);  
-    W(1800, 1150, 20, 350); 
-    W(1800, 1650, 20, 150); 
-
-    W(1200, 1800, 200, 20); 
-    W(1600, 1800, 200, 20); 
-
-    // --- OUTDOOR & INTERIOR FURNITURE ---
+    // --- FURNITURE ---
     addFurn(100, 1000, 450, 700, "pickleball", false);
     addFurn(2450, 900, 700, 800, "deck", false);
     addFurn(2550, 1000, 400, 400, "pool", false); 
     addFurn(2850, 1500, 180, 80, "bar");
     addFurn(2550, 1500, 60, 100, "deckchair"); addFurn(2650, 1500, 60, 100, "deckchair");
-
     addFurn(1250, 450, 200, 220, "bed");
     addFurn(1050, 650, 150, 80, "couch");
     addFurn(1150, 480, 60, 40, "nightstand"); addFurn(1480, 480, 60, 40, "nightstand");
     addFurn(1650, 420, 300, 50, "wardrobe");
     addFurn(1650, 530, 250, 50, "clothing_rack");
-    addFurn(1850, 620, 100, 150, "bathtub");
+    addFurn(1850, 620, 100, 150, "bathtub"); 
     addFurn(1650, 620, 120, 60, "vanity");
     addFurn(1900, 750, 50, 40, "toilet");
-
     addFurn(800, 950, 200, 80, "kitchen_island"); 
     addFurn(620, 820, 60, 100, "fridge");
     addFurn(620, 950, 60, 120, "counters");
     addFurn(750, 1200, 300, 120, "dining_table");   
     addFurn(800, 1500, 250, 100, "lounge_sofa");
-    
-    // THE LOUNGE COMPUTER
     addFurn(650, 1600, 120, 80, "computer_desk");
-
     addFurn(2100, 820, 40, 400, "bookshelf_vert");     
     addFurn(1850, 1150, 300, 40, "bookshelf");
     addFurn(1900, 950, 100, 100, "reading_chair");
     addFurn(2000, 1450, 160, 80, "desk");          
     addFurn(2200, 1450, 60, 60, "plant");
-    
     addFurn(1300, 1450, 180, 140, "piano");       
     addFurn(1300, 850, 400, 900, "red_carpet", false);
 
     // --- ACCESSIBLE GLOWING PROPS ---
     addProp(650, 1600, "Security Computer", "System Locked.", "computer", 140);
     addProp(900, 970, "Empty Stand", "Wait... this is where the Paleo Bakes sugar-free chocolate cake was supposed to be! It's completely missing, but there is a smear of sugar-free icing leading towards the door.", "prop");
-    addProp(1700, 640, "Vanity Setup", "A very specific skincare regimen: CeraVe face wash for normal to oily skin, Tretinoin 0.025, and Isdin Fusion Water sunscreen.", "prop");
-    addProp(1700, 440, "Wardrobe Setup", "A neat row of custom Bombay Shirt Company shirts and several pairs of Brooks Running shoes.", "prop");
-    addProp(850, 1230, "Warm Food", "A massive, fresh order of Egg Schezwan Fried Rice from Kuai Kitchen.", "prop");
-    addProp(2600, 1520, "Poolside Items", "A Garmin smartwatch and some Speedo swimming gear left by the water.", "prop");
+    addProp(1700, 640, "Vanity Setup", "A very specific skincare regimen: CeraVe face wash for normal to oily skin, Isdin Fusion Water sunscreen, and a tub of Brazilian Bum Bum Cream 62.", "prop");
+    addProp(1300, 480, "Graduation Photo", "A framed photo from your graduation ceremony on June 16th.", "prop");
+    addProp(850, 1230, "Sushi Delivery", "Exactly 3 empty boxes of Sushi. The receipt shows a delivery time of 23:00.", "prop");
+    addProp(2600, 1520, "Poolside Items", "A Whoop strap and some Speedo swimming gear left by the water.", "prop");
     
-    // Collision logic for spawning
+    // Trees
     function isColliding(r1, r2) {{ return r1.x < r2.x + r2.w && r1.x + r1.w > r2.x && r1.y < r2.y + r2.h && r1.y + r1.h > r2.y; }}
-    
     function canMove(newX, newY, w, h) {{
         let pNext = {{ x: newX, y: newY, w: w, h: h }};
         if(newX < 20 || newX + w > MAP_W-20 || newY < 20 || newY + h > MAP_H-20) return false;
@@ -221,7 +191,6 @@ game_html = f"""
         return true;
     }}
 
-    // Trees
     for(let i=0; i<80; i++) {{
         let tx = 100 + Math.random()*3000; let ty = 100 + Math.random()*2400;
         if(tx > 500 && tx < 2500 && ty > 300 && ty < 1900) continue; 
@@ -232,26 +201,18 @@ game_html = f"""
         addFurn(tx, ty, 60, 60, "tree");
     }}
 
-    // BUG-FREE DYNAMIC SPAWNING
+    // Spawn NPCs Dynamically
     const spawnZones = [
-        {{x: 650, y: 850, w: 400, h: 200}}, // Kitchen
-        {{x: 650, y: 1150, w: 400, h: 200}}, // Dining
-        {{x: 650, y: 1450, w: 400, h: 200}}, // Lounge
-        {{x: 1850, y: 850, w: 400, h: 400}}, // Library
-        {{x: 1850, y: 1350, w: 400, h: 300}}, // Study
-        {{x: 1250, y: 850, w: 400, h: 800}}, // Hall
-        {{x: 2500, y: 1000, w: 200, h: 300}}, // Pool
-        {{x: 200, y: 1000, w: 300, h: 400}}  // Pickleball
+        {{x: 650, y: 850, w: 400, h: 200}}, {{x: 650, y: 1150, w: 400, h: 200}}, {{x: 650, y: 1450, w: 400, h: 200}}, 
+        {{x: 1850, y: 850, w: 400, h: 400}}, {{x: 1850, y: 1350, w: 400, h: 300}}, {{x: 1250, y: 850, w: 400, h: 800}}, 
+        {{x: 2500, y: 1000, w: 200, h: 300}}, {{x: 200, y: 1000, w: 300, h: 400}}
     ];
 
     rawNpcs.forEach(data => {{
-        let placed = false;
-        let attempts = 0;
+        let placed = false; let attempts = 0;
         while(!placed && attempts < 100) {{
             let zone = spawnZones[Math.floor(Math.random() * spawnZones.length)];
-            let nx = zone.x + Math.random() * zone.w;
-            let ny = zone.y + Math.random() * zone.h;
-            // Ensure they don't spawn inside a table or wall
+            let nx = zone.x + Math.random() * zone.w; let ny = zone.y + Math.random() * zone.h;
             if(canMove(nx, ny, 24, 32)) {{
                 npcs.push({{ x: nx, y: ny, w: 24, h: 32, data: data, vx: 0, vy: 0, timer: 0, near: false }});
                 placed = true;
@@ -313,7 +274,6 @@ game_html = f"""
         }});
     }}
 
-    // --- RENDER PIPELINE ---
     function drawCharacter(x, y, color, name, isPlayer=false) {{
         ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
         ctx.fillStyle = color; ctx.fillRect(x, y+10, 24, 22); 
@@ -336,17 +296,13 @@ game_html = f"""
         let camY = canvas.height/2 - (player.y + player.h/2);
         ctx.translate(camX, camY);
 
-        ctx.fillStyle = "#6B4423"; ctx.fillRect(1450, 1780, 100, 820); // Path
-        ctx.fillStyle = "#111"; 
-        ctx.fillRect(1380, MAP_H-30, 40, 40); ctx.fillRect(1580, MAP_H-30, 40, 40); // Gate Pillars
-        ctx.fillStyle = "#333"; ctx.fillRect(1420, MAP_H-15, 160, 10); // Gate
+        ctx.fillStyle = "#6B4423"; ctx.fillRect(1450, 1780, 100, 820); 
+        ctx.fillStyle = "#111"; ctx.fillRect(1380, MAP_H-30, 40, 40); ctx.fillRect(1580, MAP_H-30, 40, 40); 
+        ctx.fillStyle = "#333"; ctx.fillRect(1420, MAP_H-15, 160, 10); 
 
-        // Mansion Floors
         ctx.fillStyle = "#8b5a2b"; 
-        ctx.fillRect(1000, 400, 1000, 400); // North
-        ctx.fillRect(600, 800, 1800, 1000); // West/East/Hall
-        
-        // Bathroom/WIW Tiles
+        ctx.fillRect(1000, 400, 1000, 400); 
+        ctx.fillRect(600, 800, 1800, 1000); 
         ctx.fillStyle = "#cfd8dc"; ctx.fillRect(1600, 400, 400, 400); 
 
         ctx.fillStyle = "#1a1a1a";
@@ -354,10 +310,8 @@ game_html = f"""
         walls.forEach(w => ctx.fillRect(w.x, w.y, w.w, w.h));
         ctx.shadowBlur = 0;
 
-        // HIGH-DEF FURNITURE RENDERING
         furniture.forEach(f => {{
             ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
-            
             if(f.type === "pool") {{
                 ctx.fillStyle = '#e0e0e0'; ctx.fillRect(f.x-10, f.y-10, f.w+20, f.h+20); 
                 let grad = ctx.createLinearGradient(f.x, f.y, f.x+f.w, f.y+f.h);
@@ -385,6 +339,7 @@ game_html = f"""
                 ctx.beginPath(); ctx.arc(f.x+90, f.y-15, 15, 0, Math.PI*2); ctx.fill();
                 ctx.beginPath(); ctx.arc(f.x+150, f.y-15, 15, 0, Math.PI*2); ctx.fill();
             }}
+            else if(f.type === "deckchair") {{ ctx.fillStyle = '#fff'; ctx.fillRect(f.x, f.y, f.w, f.h); ctx.fillStyle = '#03a9f4'; ctx.fillRect(f.x+5, f.y+5, f.w-10, f.h-10);}}
             else if(f.type === "dining_table") {{
                 ctx.fillStyle = '#3E2723'; ctx.fillRect(f.x,f.y,f.w,f.h);
                 ctx.fillStyle = 'white'; 
@@ -395,8 +350,8 @@ game_html = f"""
             }}
             else if(f.type === "computer_desk") {{
                 ctx.fillStyle = '#2c3e50'; ctx.fillRect(f.x, f.y, f.w, f.h);
-                ctx.fillStyle = '#ecf0f1'; ctx.fillRect(f.x+30, f.y+20, 60, 40); // Screen
-                ctx.fillStyle = '#3498db'; ctx.fillRect(f.x+35, f.y+25, 50, 30); // Inner Screen glow
+                ctx.fillStyle = '#ecf0f1'; ctx.fillRect(f.x+30, f.y+20, 60, 40); 
+                ctx.fillStyle = '#3498db'; ctx.fillRect(f.x+35, f.y+25, 50, 30); 
             }}
             else if(f.type === "bed") {{
                 ctx.fillStyle = '#3e2723'; ctx.fillRect(f.x,f.y,f.w,f.h); 
@@ -417,7 +372,6 @@ game_html = f"""
             else if(f.type === "bathtub") {{
                 ctx.fillStyle = 'white'; ctx.beginPath(); ctx.roundRect(f.x, f.y, f.w, f.h, 20); ctx.fill();
                 ctx.fillStyle = '#e0e0e0'; ctx.beginPath(); ctx.roundRect(f.x+10, f.y+10, f.w-20, f.h-20, 15); ctx.fill();
-                ctx.fillStyle = 'silver'; ctx.beginPath(); ctx.arc(f.x+f.w/2, f.y+20, 5, 0, Math.PI*2); ctx.fill();
             }}
             else if(f.type === "vanity") {{
                 ctx.fillStyle = '#5D4037'; ctx.fillRect(f.x, f.y, f.w, f.h);
@@ -441,7 +395,6 @@ game_html = f"""
             ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
         }});
 
-        // Room Labels
         ctx.fillStyle = "rgba(255,255,255,0.4)"; ctx.font = "bold 40px 'Nunito'"; ctx.textAlign="center";
         ctx.fillText("MASTER BEDROOM", 1300, 600); 
         ctx.fillText("BATHROOM", 1800, 720); ctx.fillText("WALK-IN", 1800, 520);
@@ -449,7 +402,6 @@ game_html = f"""
         ctx.fillText("LIBRARY", 2100, 1050); ctx.fillText("STUDY", 2100, 1550);
         ctx.fillText("GRAND HALL", 1500, 1300); ctx.fillText("PICKLEBALL COURT", 350, 1400);
 
-        // Pulsating Interactive Props
         let pulse = Math.sin(Date.now() / 150) * 4;
         interactables.forEach(p => {{
             ctx.fillStyle = p.type === "computer" ? "rgba(0, 215, 255, 0.4)" : "rgba(255, 215, 0, 0.4)";
@@ -466,7 +418,6 @@ game_html = f"""
         
         drawCharacter(player.x, player.y, "#00d2ff", "Shanaya", true);
 
-        // Translucent Fog
         let pRoom = getRoom(player.x + player.w/2, player.y + player.h/2);
         ctx.fillStyle = "rgba(0, 0, 0, 0.65)"; 
 
@@ -493,16 +444,20 @@ game_html = f"""
         if(targetProp) {{
             if(targetProp.type === "computer") {{
                 if(interrogatedGuests.size < TOTAL_GUESTS) {{
-                    // Calculate exactly who is missing
                     let missing = allNamesList.filter(n => !interrogatedGuests.has(n));
                     document.getElementById("modal-title").innerText = targetProp.title;
                     document.getElementById("modal-text").innerText = `Access Denied. You must interrogate all guests first to unlock the security system. (Progress: ${{interrogatedGuests.size}} / ${{TOTAL_GUESTS}})\n\nMissing statements from:\n${{missing.join(", ")}}`;
                     document.getElementById("video-container").innerHTML = ""; 
                 }} else {{
-                    document.getElementById("modal-title").innerText = "SYSTEM UNLOCKED";
-                    document.getElementById("modal-text").innerText = "Rahil says: 'Scroll down and guess, and if you get it wrong, you can just have a look at the CCTV camera.'";
-                    // Placeholder for CCTV Video Link
-                    document.getElementById("video-container").innerHTML = `<iframe width="100%" height="280" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" frameborder="0"></iframe>`;
+                    let code = prompt("SECURITY TERMINAL LOCKED.\n\nPasscode Hint: Bum Bum Cream Scent + (Delivery Hour - Sushi Boxes) + Grad Day.\n\nEnter 6-digit passcode:");
+                    if(code === "622016") {{
+                        document.getElementById("modal-title").innerText = "SYSTEM UNLOCKED - CCTV FOOTAGE";
+                        document.getElementById("modal-text").innerText = "The camera feed is heavily glitched, but you pull a 5-second clip from exactly 11:58 PM. You cannot see the culprit's face. However, you clearly see them carrying a heavy brass CANDLESTICK from the Library. As they pry open the cake box in the KITCHEN, a glowing WHOOP strap illuminates their wrist. They grab a slice of the Paleo Bakes cake and sprint out!";
+                        document.getElementById("video-container").innerHTML = `<iframe width="100%" height="280" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" frameborder="0"></iframe>`;
+                    }} else if (code) {{
+                        alert("ACCESS DENIED. Incorrect Passcode.");
+                        return;
+                    }} else {{ return; }}
                 }}
             }} else {{
                 document.getElementById("modal-title").innerText = targetProp.title;
@@ -540,7 +495,7 @@ game_html = f"""
     }}
 
     function initPad() {{
-        const s = {json.dumps(["Rahul", "Aditi", "Karan", "Prof. Aris", "Mme. Elara", "Maanav", "Divya", "Sarthak"])};
+        const s = {json.dumps(["Maanav", "Shlokk", "Panthiv", "Rahil", "Divya", "Sarthak"])};
         const w = {json.dumps(["Candlestick", "Poison", "Rope", "Axe", "Dagger"])};
         const r = {json.dumps(["Kitchen", "Dining", "Library", "Study", "Lounge", "MasterBed", "Bathroom", "WIW", "Grand Hall"])};
         
@@ -574,7 +529,7 @@ components.html(game_html, height=730)
 st.divider()
 
 col1, col2, col3 = st.columns(3)
-with col1: guess_who = st.selectbox("Suspect", ["Select", "Maanav", "Anoushka", "Divya", "Sarthak", "Rahil"])
+with col1: guess_who = st.selectbox("Suspect", ["Select", "Maanav", "Anoushka", "Divya", "Sarthak", "Rahil", "Shlokk", "Panthiv"])
 with col2: guess_where = st.selectbox("Location", ["Select", "Kitchen", "Dining", "Library", "Study", "MasterBed", "Lounge", "Bathroom", "WIW", "Grand Hall"])
 with col3: guess_weapon = st.selectbox("Weapon", ["Select", "Candlestick", "Poison", "Rope", "Axe", "Dagger"])
     
