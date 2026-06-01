@@ -75,6 +75,14 @@ game_html = f"""
     .btn {{ background: #fdd835; color: #111; border: none; padding: 10px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 16px; margin-top: 15px; width: 100%; }}
     .btn:hover {{ background: #fff176; }}
 
+    #passcode-box {{
+        display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background: #111; border: 3px solid #00d2ff; border-radius: 12px; padding: 30px;
+        text-align: center; width: 80%; max-width: 450px; z-index: 110; box-shadow: 0px 20px 60px rgba(0,0,0,0.95);
+    }}
+    #passcode-box input {{ width: 80%; padding: 15px; font-size: 20px; text-align: center; border-radius: 8px; border: 2px solid #555; background: #222; color: white; margin: 15px 0; font-weight: bold; letter-spacing: 5px;}}
+    #passcode-box input:focus {{ outline: none; border-color: #00d2ff; }}
+
     #clue-pad-overlay {{
         display: none; position: absolute; top: 20px; left: 20px; width: calc(100% - 40px); height: calc(100% - 40px);
         background: rgba(20, 20, 25, 0.98); border: 2px solid #555; border-radius: 12px; padding: 20px; z-index: 90; box-sizing: border-box; overflow-y: auto;
@@ -100,6 +108,16 @@ game_html = f"""
         <p id="modal-text" style="font-size: 18px; color: #eee; margin: 15px 0; font-weight: bold; line-height: 1.5;"></p>
         <button class="btn" onclick="closeModal()">Close & Resume</button>
     </div>
+
+    <div id="passcode-box">
+        <h2 style="color: #00d2ff; font-family: 'Cinzel', serif; margin-top: 0;">SECURITY TERMINAL</h2>
+        <p style="color: #ccc; font-size: 14px;">Hint: Bum Bum Cream Scent + (Delivery Hour - Sushi Boxes) + Grad Day</p>
+        <p id="passcode-error" style="color: #ff5252; font-weight: bold; display: none; margin-bottom: 0;">ACCESS DENIED. INCORRECT CODE.</p>
+        <input type="text" id="passcode-input" placeholder="000000" maxlength="6" autocomplete="off">
+        <button class="btn" style="background: #00d2ff; color: black;" onclick="checkPasscode()">UNLOCK SYSTEM</button>
+        <button class="btn" style="background: #444; color: white; margin-top: 10px;" onclick="closePasscode()">CANCEL</button>
+    </div>
+
     <div id="clue-pad-overlay">
         <h2 style="text-align: center; color: #4fc3f7; margin-top: 0; font-family: 'Cinzel', serif;">📋 Detective Pad</h2>
         <div class="grid" id="clue-grid">
@@ -132,15 +150,28 @@ game_html = f"""
     function addFurn(x, y, w, h, type, solid=true) {{ furniture.push({{x, y, w, h, type, solid}}); }}
     function addProp(x, y, title, text, type="prop", radius=130) {{ interactables.push({{x, y, w: 24, h: 24, title, text, type, radius, near: false}}); }}
 
+    // Collision Functions
+    function isColliding(r1, r2) {{ return r1.x < r2.x + r2.w && r1.x + r1.w > r2.x && r1.y < r2.y + r2.h && r1.y + r1.h > r2.y; }}
+    function canMove(newX, newY, w, h) {{
+        let pNext = {{ x: newX, y: newY, w: w, h: h }};
+        if(newX < 20 || newX + w > MAP_W-20 || newY < 20 || newY + h > MAP_H-20) return false;
+        for(let wl of walls) if(isColliding(pNext, wl)) return false;
+        for(let f of furniture) if(f.solid && isColliding(pNext, f)) return false;
+        return true;
+    }}
+
     // --- ARCHITECTURE ---
     W(0, 0, MAP_W, 20); W(0, MAP_H-20, 1400, 20); W(1600, MAP_H-20, 1600, 20); 
     W(0, 0, 20, MAP_H); W(MAP_W-20, 0, 20, MAP_H);
+
     W(1000, 400, 1000, 20); W(1000, 400, 20, 380); W(1980, 400, 20, 380);  
     W(1000, 780, 300, 20); W(1450, 780, 550, 20);  
     W(1600, 420, 20, 80); W(1600, 600, 20, 50); W(1600, 730, 20, 50); W(1620, 600, 360, 20);  
+
     W(600, 800, 400, 20); W(600, 800, 20, 1000); W(600, 1800, 600, 20);  
     W(620, 1100, 560, 20); W(620, 1400, 560, 20);  
     W(1180, 800, 20, 100); W(1180, 1050, 20, 150); W(1180, 1350, 20, 200); W(1180, 1700, 20, 100); 
+
     W(1800, 800, 600, 20); W(2380, 800, 20, 1000); W(1800, 1800, 600, 20); W(1820, 1300, 560, 20); 
     W(1800, 800, 20, 200); W(1800, 1150, 20, 350); W(1800, 1650, 20, 150); 
     W(1200, 1800, 200, 20); W(1600, 1800, 200, 20); 
@@ -151,6 +182,7 @@ game_html = f"""
     addFurn(2550, 1000, 400, 400, "pool", false); 
     addFurn(2850, 1500, 180, 80, "bar");
     addFurn(2550, 1500, 60, 100, "deckchair"); addFurn(2650, 1500, 60, 100, "deckchair");
+
     addFurn(1250, 450, 200, 220, "bed");
     addFurn(1050, 650, 150, 80, "couch");
     addFurn(1150, 480, 60, 40, "nightstand"); addFurn(1480, 480, 60, 40, "nightstand");
@@ -159,21 +191,25 @@ game_html = f"""
     addFurn(1850, 620, 100, 150, "bathtub"); 
     addFurn(1650, 620, 120, 60, "vanity");
     addFurn(1900, 750, 50, 40, "toilet");
+
     addFurn(800, 950, 200, 80, "kitchen_island"); 
     addFurn(620, 820, 60, 100, "fridge");
     addFurn(620, 950, 60, 120, "counters");
     addFurn(750, 1200, 300, 120, "dining_table");   
     addFurn(800, 1500, 250, 100, "lounge_sofa");
+    
     addFurn(650, 1600, 120, 80, "computer_desk");
+
     addFurn(2100, 820, 40, 400, "bookshelf_vert");     
     addFurn(1850, 1150, 300, 40, "bookshelf");
     addFurn(1900, 950, 100, 100, "reading_chair");
     addFurn(2000, 1450, 160, 80, "desk");          
     addFurn(2200, 1450, 60, 60, "plant");
+    
     addFurn(1300, 1450, 180, 140, "piano");       
     addFurn(1300, 850, 400, 900, "red_carpet", false);
 
-    // --- ACCESSIBLE GLOWING PROPS ---
+    // --- GLOWING PROPS ---
     addProp(650, 1600, "Security Computer", "System Locked.", "computer", 140);
     addProp(900, 970, "Empty Stand", "Wait... this is where the Paleo Bakes sugar-free chocolate cake was supposed to be! It's completely missing, but there is a smear of sugar-free icing leading towards the door.", "prop");
     addProp(1700, 640, "Vanity Setup", "A very specific skincare regimen: CeraVe face wash for normal to oily skin, Isdin Fusion Water sunscreen, and a tub of Brazilian Bum Bum Cream 62.", "prop");
@@ -181,16 +217,7 @@ game_html = f"""
     addProp(850, 1230, "Sushi Delivery", "Exactly 3 empty boxes of Sushi. The receipt shows a delivery time of 23:00.", "prop");
     addProp(2600, 1520, "Poolside Items", "A Whoop strap and some Speedo swimming gear left by the water.", "prop");
     
-    // Trees
-    function isColliding(r1, r2) {{ return r1.x < r2.x + r2.w && r1.x + r1.w > r2.x && r1.y < r2.y + r2.h && r1.y + r1.h > r2.y; }}
-    function canMove(newX, newY, w, h) {{
-        let pNext = {{ x: newX, y: newY, w: w, h: h }};
-        if(newX < 20 || newX + w > MAP_W-20 || newY < 20 || newY + h > MAP_H-20) return false;
-        for(let wl of walls) if(isColliding(pNext, wl)) return false;
-        for(let f of furniture) if(f.solid && isColliding(pNext, f)) return false;
-        return true;
-    }}
-
+    // Spawn Trees Safely
     for(let i=0; i<80; i++) {{
         let tx = 100 + Math.random()*3000; let ty = 100 + Math.random()*2400;
         if(tx > 500 && tx < 2500 && ty > 300 && ty < 1900) continue; 
@@ -201,7 +228,7 @@ game_html = f"""
         addFurn(tx, ty, 60, 60, "tree");
     }}
 
-    // Spawn NPCs Dynamically
+    // Spawn NPCs Safely
     const spawnZones = [
         {{x: 650, y: 850, w: 400, h: 200}}, {{x: 650, y: 1150, w: 400, h: 200}}, {{x: 650, y: 1450, w: 400, h: 200}}, 
         {{x: 1850, y: 850, w: 400, h: 400}}, {{x: 1850, y: 1350, w: 400, h: 300}}, {{x: 1250, y: 850, w: 400, h: 800}}, 
@@ -221,7 +248,7 @@ game_html = f"""
         }}
     }});
 
-    // --- ENGINE LOGIC ---
+    // --- INPUT ---
     window.addEventListener("keydown", (e) => {{
         keys[e.code] = true;
         if(e.code === "Space" && !modalOpen && !padOpen) interact();
@@ -310,8 +337,10 @@ game_html = f"""
         walls.forEach(w => ctx.fillRect(w.x, w.y, w.w, w.h));
         ctx.shadowBlur = 0;
 
+        // HIGH DEF FURNITURE (NO ROUND RECT TO PREVENT CRASHES ON SAFARI)
         furniture.forEach(f => {{
             ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
+            
             if(f.type === "pool") {{
                 ctx.fillStyle = '#e0e0e0'; ctx.fillRect(f.x-10, f.y-10, f.w+20, f.h+20); 
                 let grad = ctx.createLinearGradient(f.x, f.y, f.x+f.w, f.y+f.h);
@@ -370,8 +399,8 @@ game_html = f"""
                 ctx.fillStyle = '#37474f'; ctx.fillRect(f.x,f.y,25,f.h); ctx.fillRect(f.x+f.w-25,f.y,25,f.h); ctx.fillRect(f.x,f.y,f.w,25);
             }}
             else if(f.type === "bathtub") {{
-                ctx.fillStyle = 'white'; ctx.beginPath(); ctx.roundRect(f.x, f.y, f.w, f.h, 20); ctx.fill();
-                ctx.fillStyle = '#e0e0e0'; ctx.beginPath(); ctx.roundRect(f.x+10, f.y+10, f.w-20, f.h-20, 15); ctx.fill();
+                ctx.fillStyle = 'white'; ctx.fillRect(f.x, f.y, f.w, f.h);
+                ctx.fillStyle = '#e0e0e0'; ctx.fillRect(f.x+10, f.y+10, f.w-20, f.h-20);
             }}
             else if(f.type === "vanity") {{
                 ctx.fillStyle = '#5D4037'; ctx.fillRect(f.x, f.y, f.w, f.h);
@@ -448,23 +477,20 @@ game_html = f"""
                     document.getElementById("modal-title").innerText = targetProp.title;
                     document.getElementById("modal-text").innerText = `Access Denied. You must interrogate all guests first to unlock the security system. (Progress: ${{interrogatedGuests.size}} / ${{TOTAL_GUESTS}})\n\nMissing statements from:\n${{missing.join(", ")}}`;
                     document.getElementById("video-container").innerHTML = ""; 
+                    document.getElementById("dialogue-box").style.display = "block";
                 }} else {{
-                    let code = prompt("SECURITY TERMINAL LOCKED.\n\nPasscode Hint: Bum Bum Cream Scent + (Delivery Hour - Sushi Boxes) + Grad Day.\n\nEnter 6-digit passcode:");
-                    if(code === "622016") {{
-                        document.getElementById("modal-title").innerText = "SYSTEM UNLOCKED - CCTV FOOTAGE";
-                        document.getElementById("modal-text").innerText = "The camera feed is heavily glitched, but you pull a 5-second clip from exactly 11:58 PM. You cannot see the culprit's face. However, you clearly see them carrying a heavy brass CANDLESTICK from the Library. As they pry open the cake box in the KITCHEN, a glowing WHOOP strap illuminates their wrist. They grab a slice of the Paleo Bakes cake and sprint out!";
-                        document.getElementById("video-container").innerHTML = `<iframe width="100%" height="280" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" frameborder="0"></iframe>`;
-                    }} else if (code) {{
-                        alert("ACCESS DENIED. Incorrect Passcode.");
-                        return;
-                    }} else {{ return; }}
+                    // TRIGGER THE SAFE PASSCODE UI
+                    document.getElementById("passcode-box").style.display = "block";
+                    document.getElementById("passcode-input").value = "";
+                    document.getElementById("passcode-error").style.display = "none";
+                    document.getElementById("passcode-input").focus();
                 }}
             }} else {{
                 document.getElementById("modal-title").innerText = targetProp.title;
                 document.getElementById("modal-text").innerText = targetProp.text;
                 document.getElementById("video-container").innerHTML = ""; 
+                document.getElementById("dialogue-box").style.display = "block";
             }}
-            document.getElementById("dialogue-box").style.display = "block";
             modalOpen = true; return;
         }}
 
@@ -479,6 +505,25 @@ game_html = f"""
             document.getElementById("dialogue-box").style.display = "block";
             modalOpen = true;
         }}
+    }}
+
+    // CUSTOM PASSCODE LOGIC (Safe in iFrames)
+    window.checkPasscode = function() {{
+        let code = document.getElementById("passcode-input").value;
+        if(code === "622016") {{
+            document.getElementById("passcode-box").style.display = "none";
+            document.getElementById("modal-title").innerText = "SYSTEM UNLOCKED - CCTV FOOTAGE";
+            document.getElementById("modal-text").innerText = "The camera feed is heavily glitched, but you pull a 5-second clip from exactly 11:58 PM. You cannot see the culprit's face. However, you clearly see them carrying a heavy brass CANDLESTICK from the Library. As they pry open the cake box in the KITCHEN, a glowing WHOOP strap illuminates their wrist. They grab a slice of the Paleo Bakes cake and sprint out!";
+            document.getElementById("video-container").innerHTML = `<iframe width="100%" height="280" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" frameborder="0"></iframe>`;
+            document.getElementById("dialogue-box").style.display = "block";
+        }} else {{
+            document.getElementById("passcode-error").style.display = "block";
+        }}
+    }}
+
+    window.closePasscode = function() {{
+        document.getElementById("passcode-box").style.display = "none";
+        setTimeout(() => modalOpen = false, 200);
     }}
 
     window.closeModal = function() {{
@@ -502,7 +547,7 @@ game_html = f"""
         function buildCol(id, list, prefix) {{
             let col = document.getElementById(id);
             list.forEach(item => {{
-                let uid = prefix + item.replace(/\s/g, '');
+                let uid = prefix + item.split(' ').join('');
                 padData[uid] = 0;
                 col.innerHTML += `<div class='pad-row'><span>${{item}}</span><button id='${{uid}}' class='toggle-cycle' onclick='cycle("${{uid}}")'>-</button></div>`;
             }});
