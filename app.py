@@ -5,6 +5,44 @@ import random
 
 st.set_page_config(page_title="Shanaya's Birthday Mystery", layout="wide")
 
+# =====================================================================
+# 🎬 PASTE YOUR YOUTUBE EMBED LINKS HERE 🎬
+# Replace "YOUR_LINK_HERE" with the actual embed URL for each person.
+# Example: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+# =====================================================================
+
+VIDEO_LINKS = {
+    "Rahil": "YOUR_LINK_HERE",
+    "Maanav": "YOUR_LINK_HERE",
+    "Divya": "YOUR_LINK_HERE",
+    "Sarthak": "YOUR_LINK_HERE",
+    "Anoushka": "YOUR_LINK_HERE",
+    "Alicia": "YOUR_LINK_HERE",
+    "Manav T": "YOUR_LINK_HERE",
+    "Selina": "YOUR_LINK_HERE",
+    "Panthiv": "YOUR_LINK_HERE",
+    "Shlokk": "YOUR_LINK_HERE",
+    "Kshitija": "YOUR_LINK_HERE",
+    "Pareen": "YOUR_LINK_HERE",
+    "Alisha": "YOUR_LINK_HERE",
+    "Ishika": "YOUR_LINK_HERE",
+    "Mandira": "YOUR_LINK_HERE",
+    "Mom": "YOUR_LINK_HERE",
+    "Dadu": "YOUR_LINK_HERE",
+    "Dad": "YOUR_LINK_HERE",
+    "Suchi": "YOUR_LINK_HERE",
+    "Miloni": "YOUR_LINK_HERE",
+    "Rahil Patel": "YOUR_LINK_HERE",
+    "Shlok patel": "YOUR_LINK_HERE",
+    "Sahil": "YOUR_LINK_HERE",
+    "Dua": "YOUR_LINK_HERE",
+    "Rhea": "YOUR_LINK_HERE",
+    "Ryan": "YOUR_LINK_HERE",
+    "Shranay": "YOUR_LINK_HERE"
+}
+
+# =====================================================================
+
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Nunito:wght@400;700;900&display=swap');
@@ -17,7 +55,7 @@ st.markdown("""
 st.markdown("<h1>SHANAYA'S MYSTERY</h1>", unsafe_allow_html=True)
 st.markdown("<div class='instruction'><b>WASD/Arrows</b> to move | <b>Spacebar</b> to talk/inspect | <b>C</b> for Case File</div>", unsafe_allow_html=True)
 
-# --- 1. GUEST LIST & NPC DATABASE (27 Characters) ---
+# --- GUEST LIST & NPC DATABASE (27 Characters) ---
 colors = ["#e50914", "#9c27b0", "#3f51b5", "#009688", "#ff9800", "#795548", "#607d8b", "#e91e63", "#00bcd4", "#cddc39", "#ff5722"]
 
 npcs_data = [
@@ -50,9 +88,14 @@ npcs_data = [
     {"name": "Shranay", "clue": "Best birthday party ever. I'm having a blast."}
 ]
 
+# Map the links from the dictionary at the top to the characters
 for npc in npcs_data:
     npc["color"] = random.choice(colors)
-    npc["video"] = "https://www.youtube.com/embed/dQw4w9WgXcQ" 
+    # If a link isn't provided or is left as "YOUR_LINK_HERE", fallback to the default Rickroll
+    link = VIDEO_LINKS.get(npc["name"], "YOUR_LINK_HERE")
+    if link == "YOUR_LINK_HERE" or link == "":
+        link = "https://www.youtube.com/embed/dQw4w9WgXcQ"
+    npc["video"] = link 
 
 all_names_json = json.dumps([n["name"] for n in npcs_data])
 
@@ -150,7 +193,6 @@ game_html = f"""
     function addFurn(x, y, w, h, type, solid=true) {{ furniture.push({{x, y, w, h, type, solid}}); }}
     function addProp(x, y, title, text, type="prop", radius=130) {{ interactables.push({{x, y, w: 24, h: 24, title, text, type, radius, near: false}}); }}
 
-    // Collision Functions
     function isColliding(r1, r2) {{ return r1.x < r2.x + r2.w && r1.x + r1.w > r2.x && r1.y < r2.y + r2.h && r1.y + r1.h > r2.y; }}
     function canMove(newX, newY, w, h) {{
         let pNext = {{ x: newX, y: newY, w: w, h: h }};
@@ -248,7 +290,7 @@ game_html = f"""
         }}
     }});
 
-    // --- INPUT ---
+    // --- ENGINE LOGIC ---
     window.addEventListener("keydown", (e) => {{
         keys[e.code] = true;
         if(e.code === "Space" && !modalOpen && !padOpen) interact();
@@ -337,10 +379,8 @@ game_html = f"""
         walls.forEach(w => ctx.fillRect(w.x, w.y, w.w, w.h));
         ctx.shadowBlur = 0;
 
-        // HIGH DEF FURNITURE (NO ROUND RECT TO PREVENT CRASHES ON SAFARI)
         furniture.forEach(f => {{
             ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
-            
             if(f.type === "pool") {{
                 ctx.fillStyle = '#e0e0e0'; ctx.fillRect(f.x-10, f.y-10, f.w+20, f.h+20); 
                 let grad = ctx.createLinearGradient(f.x, f.y, f.x+f.w, f.y+f.h);
@@ -479,7 +519,6 @@ game_html = f"""
                     document.getElementById("video-container").innerHTML = ""; 
                     document.getElementById("dialogue-box").style.display = "block";
                 }} else {{
-                    // TRIGGER THE SAFE PASSCODE UI
                     document.getElementById("passcode-box").style.display = "block";
                     document.getElementById("passcode-input").value = "";
                     document.getElementById("passcode-error").style.display = "none";
@@ -507,7 +546,6 @@ game_html = f"""
         }}
     }}
 
-    // CUSTOM PASSCODE LOGIC (Safe in iFrames)
     window.checkPasscode = function() {{
         let code = document.getElementById("passcode-input").value;
         if(code === "622016") {{
@@ -540,7 +578,7 @@ game_html = f"""
     }}
 
     function initPad() {{
-        const s = {json.dumps(["Maanav", "Shlokk", "Panthiv", "Rahil", "Divya", "Sarthak"])};
+        const s = {all_names_json};
         const w = {json.dumps(["Candlestick", "Poison", "Rope", "Axe", "Dagger"])};
         const r = {json.dumps(["Kitchen", "Dining", "Library", "Study", "Lounge", "MasterBed", "Bathroom", "WIW", "Grand Hall"])};
         
@@ -574,7 +612,7 @@ components.html(game_html, height=730)
 st.divider()
 
 col1, col2, col3 = st.columns(3)
-with col1: guess_who = st.selectbox("Suspect", ["Select", "Maanav", "Anoushka", "Divya", "Sarthak", "Rahil", "Shlokk", "Panthiv"])
+with col1: guess_who = st.selectbox("Suspect", ["Select"] + [n["name"] for n in npcs_data])
 with col2: guess_where = st.selectbox("Location", ["Select", "Kitchen", "Dining", "Library", "Study", "MasterBed", "Lounge", "Bathroom", "WIW", "Grand Hall"])
 with col3: guess_weapon = st.selectbox("Weapon", ["Select", "Candlestick", "Poison", "Rope", "Axe", "Dagger"])
     
