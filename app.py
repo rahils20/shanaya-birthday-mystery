@@ -32,7 +32,7 @@ VIDEO_LINKS = {
     "Dad": "YOUR_LINK_HERE",
     "Suchi": "YOUR_LINK_HERE",
     "Miloni": "YOUR_LINK_HERE",
-    "Rahil Patel": "YOUR_LINK_HERE",
+    "Rahil Patel": "https://youtu.be/ISOpeP2Oc2Y",
     "Shlok patel": "YOUR_LINK_HERE",
     "Sahil": "YOUR_LINK_HERE",
     "Dua": "YOUR_LINK_HERE",
