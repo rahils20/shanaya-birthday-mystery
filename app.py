@@ -32,13 +32,16 @@ VIDEO_LINKS = {
     "Dad": "YOUR_LINK_HERE",
     "Suchi": "YOUR_LINK_HERE",
     "Miloni": "YOUR_LINK_HERE",
-    "Rahil Patel": "https://youtu.be/ISOpeP2Oc2Y",
+    "Rahil Patel": "YOUR_LINK_HERE",
     "Shlok patel": "YOUR_LINK_HERE",
     "Sahil": "YOUR_LINK_HERE",
     "Dua": "YOUR_LINK_HERE",
     "Rhea": "YOUR_LINK_HERE",
     "Ryan": "YOUR_LINK_HERE",
-    "Shranay": "YOUR_LINK_HERE"
+    "Shranay": "YOUR_LINK_HERE",
+    "Aashna": "YOUR_LINK_HERE",
+    "Naomi": "YOUR_LINK_HERE",
+    "Sharvil": "YOUR_LINK_HERE"
 }
 
 # =====================================================================
@@ -55,7 +58,7 @@ st.markdown("""
 st.markdown("<h1>SHANAYA'S MYSTERY</h1>", unsafe_allow_html=True)
 st.markdown("<div class='instruction'><b>WASD/Arrows</b> to move | <b>Spacebar</b> to talk/inspect | <b>C</b> for Case File</div>", unsafe_allow_html=True)
 
-# --- GUEST LIST & NPC DATABASE (27 Characters) ---
+# --- GUEST LIST & NPC DATABASE (30 Characters) ---
 colors = ["#e50914", "#9c27b0", "#3f51b5", "#009688", "#ff9800", "#795548", "#607d8b", "#e91e63", "#00bcd4", "#cddc39", "#ff5722"]
 
 npcs_data = [
@@ -85,13 +88,16 @@ npcs_data = [
     {"name": "Dua", "clue": "Did someone say there was cake? I wanted a piece! Happy Birthday!"},
     {"name": "Rhea", "clue": "Happy Birthday Shanaya! Can we go swimming now?"},
     {"name": "Ryan", "clue": "Happy Birthday! I've literally just been wandering around looking for the bathroom."},
-    {"name": "Shranay", "clue": "Best birthday party ever. I'm having a blast."}
+    {"name": "Shranay", "clue": "Best birthday party ever. I'm having a blast."},
+    {"name": "Aashna", "clue": "This house is huge! I keep getting lost looking for the pool. Happy Birthday Shanaya!"},
+    {"name": "Naomi", "clue": "The music is so good tonight! We need to get everyone on the dance floor. Happy Birthday!"},
+    {"name": "Sharvil", "clue": "Hey Shanaya, Happy Birthday! Let me know when we're cutting the cake, I'm starving."}
 ]
 
 # Map the links from the dictionary at the top to the characters
 for npc in npcs_data:
     npc["color"] = random.choice(colors)
-    # If a link isn't provided or is left as "YOUR_LINK_HERE", fallback to the default Rickroll
+    # If a link isn't provided or is left as "YOUR_LINK_HERE", fallback to the default placeholder
     link = VIDEO_LINKS.get(npc["name"], "YOUR_LINK_HERE")
     if link == "YOUR_LINK_HERE" or link == "":
         link = "https://www.youtube.com/embed/dQw4w9WgXcQ"
@@ -143,7 +149,7 @@ game_html = f"""
 
 <div id="game-container">
     <canvas id="gameCanvas" width="1000" height="680"></canvas>
-    <div id="progress-tracker">Guests Interrogated: <span id="guest-count">0</span>/27</div>
+    <div id="progress-tracker">Guests Interrogated: <span id="guest-count">0</span>/30</div>
     
     <div id="dialogue-box">
         <h2 id="modal-title">Name</h2>
@@ -183,7 +189,7 @@ game_html = f"""
     
     const interrogatedGuests = new Set();
     const allNamesList = {all_names_json};
-    const TOTAL_GUESTS = 27;
+    const TOTAL_GUESTS = 30;
 
     const rawNpcs = {json.dumps(npcs_data)};
     const npcs = [];
