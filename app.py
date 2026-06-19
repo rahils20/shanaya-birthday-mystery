@@ -6,9 +6,10 @@ import random
 st.set_page_config(page_title="Shanaya's Birthday Mystery", layout="wide")
 
 # =====================================================================
-# 🎬 PASTE YOUR YOUTUBE EMBED LINKS HERE 🎬
-# Replace "YOUR_LINK_HERE" with the actual embed URL for each person.
-# Example: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+# 🎬 PASTE YOUR YOUTUBE LINKS HERE 🎬
+# You can paste ANY YouTube link format here now.
+# E.g., "https://www.youtube.com/watch?v=dQw4w9WgXcQ" 
+# or "https://youtu.be/dQw4w9WgXcQ"
 # =====================================================================
 
 VIDEO_LINKS = {
@@ -31,8 +32,8 @@ VIDEO_LINKS = {
     "Dadu": "YOUR_LINK_HERE",
     "Dad": "YOUR_LINK_HERE",
     "Suchi": "YOUR_LINK_HERE",
-    "Miloni": "https://youtu.be/lwiMKsqemg4",
-    "Rahil Patel": "https://youtu.be/ISOpeP2Oc2Y",
+    "Miloni": "YOUR_LINK_HERE",
+    "Rahil Patel": "YOUR_LINK_HERE",
     "Shlok patel": "YOUR_LINK_HERE",
     "Sahil": "YOUR_LINK_HERE",
     "Dua": "YOUR_LINK_HERE",
@@ -43,6 +44,18 @@ VIDEO_LINKS = {
     "Naomi": "YOUR_LINK_HERE",
     "Sharvil": "YOUR_LINK_HERE"
 }
+
+# --- YOUTUBE URL AUTO-CONVERTER ---
+def fix_youtube_link(url):
+    if not url or url == "YOUR_LINK_HERE":
+        return "https://www.youtube.com/embed/dQw4w9WgXcQ" # Default Placeholder
+    if "youtube.com/watch?v=" in url:
+        video_id = url.split("v=")[1].split("&")[0]
+        return f"https://www.youtube.com/embed/{video_id}"
+    elif "youtu.be/" in url:
+        video_id = url.split("youtu.be/")[1].split("?")[0]
+        return f"https://www.youtube.com/embed/{video_id}"
+    return url # Return as-is if already an embed link
 
 # =====================================================================
 
@@ -94,14 +107,11 @@ npcs_data = [
     {"name": "Sharvil", "clue": "Hey Shanaya, Happy Birthday! Let me know when we're cutting the cake, I'm starving."}
 ]
 
-# Map the links from the dictionary at the top to the characters
+# Map the links from the dictionary at the top to the characters using the auto-fixer
 for npc in npcs_data:
     npc["color"] = random.choice(colors)
-    # If a link isn't provided or is left as "YOUR_LINK_HERE", fallback to the default placeholder
-    link = VIDEO_LINKS.get(npc["name"], "YOUR_LINK_HERE")
-    if link == "YOUR_LINK_HERE" or link == "":
-        link = "https://www.youtube.com/embed/dQw4w9WgXcQ"
-    npc["video"] = link 
+    raw_link = VIDEO_LINKS.get(npc["name"], "YOUR_LINK_HERE")
+    npc["video"] = fix_youtube_link(raw_link)
 
 all_names_json = json.dumps([n["name"] for n in npcs_data])
 
@@ -558,7 +568,11 @@ game_html = f"""
             document.getElementById("passcode-box").style.display = "none";
             document.getElementById("modal-title").innerText = "SYSTEM UNLOCKED - CCTV FOOTAGE";
             document.getElementById("modal-text").innerText = "The camera feed is heavily glitched, but you pull a 5-second clip from exactly 11:58 PM. You cannot see the culprit's face. However, you clearly see them carrying a heavy brass CANDLESTICK from the Library. As they pry open the cake box in the KITCHEN, a glowing WHOOP strap illuminates their wrist. They grab a slice of the Paleo Bakes cake and sprint out!";
-            document.getElementById("video-container").innerHTML = `<iframe width="100%" height="280" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" frameborder="0"></iframe>`;
+            
+            // This pulls Rahil's video from the links dictionary to act as the "CCTV footage" reveal
+            let cctv_link = "{fix_youtube_link(VIDEO_LINKS.get('Rahil', ''))}"; 
+            
+            document.getElementById("video-container").innerHTML = `<iframe width="100%" height="280" src="${{cctv_link}}?autoplay=1" frameborder="0"></iframe>`;
             document.getElementById("dialogue-box").style.display = "block";
         }} else {{
             document.getElementById("passcode-error").style.display = "block";
