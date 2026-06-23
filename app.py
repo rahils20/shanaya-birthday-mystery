@@ -15,7 +15,7 @@ st.set_page_config(page_title="Shanaya's Birthday Mystery", layout="wide")
 VIDEO_LINKS = {
     "Rahil": "YOUR_LINK_HERE",
     "Maanav": "YOUR_LINK_HERE",
-    "Divya": "YOUR_LINK_HERE",
+    "Divya": "https://youtube.com/shorts/esov4ekN_U4",
     "Sarthak": "YOUR_LINK_HERE",
     "Anoushka": "YOUR_LINK_HERE",
     "Alicia": "YOUR_LINK_HERE",
