@@ -42,7 +42,7 @@ VIDEO_LINKS = {
     "Shranay": "YOUR_LINK_HERE",
     "Aashna": "YOUR_LINK_HERE",
     "Naomi": "YOUR_LINK_HERE",
-    "Sharvil": "YOUR_LINK_HERE"
+    "Sharvil": "https://youtube.com/shorts/5QFL55_Wttc"
 }
 
 # --- YOUTUBE URL AUTO-CONVERTER ---
