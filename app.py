@@ -49,13 +49,24 @@ VIDEO_LINKS = {
 def fix_youtube_link(url):
     if not url or url == "YOUR_LINK_HERE":
         return "https://www.youtube.com/embed/dQw4w9WgXcQ" # Default Placeholder
+    
+    # Handle standard watch links
     if "youtube.com/watch?v=" in url:
         video_id = url.split("v=")[1].split("&")[0]
         return f"https://www.youtube.com/embed/{video_id}"
+    
+    # Handle short mobile share links
     elif "youtu.be/" in url:
         video_id = url.split("youtu.be/")[1].split("?")[0]
         return f"https://www.youtube.com/embed/{video_id}"
-    return url # Return as-is if already an embed link
+        
+    # Handle YouTube Shorts links
+    elif "youtube.com/shorts/" in url:
+        video_id = url.split("shorts/")[1].split("?")[0]
+        return f"https://www.youtube.com/embed/{video_id}"
+        
+    # Return as-is if already an embed link
+    return url
 
 # =====================================================================
 
