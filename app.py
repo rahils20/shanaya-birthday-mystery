@@ -17,7 +17,7 @@ VIDEO_LINKS = {
     "Maanav": "https://youtube.com/shorts/82v7Clu82zw",
     "Divya": "https://youtube.com/shorts/esov4ekN_U4",
     "Sarthak": "YOUR_LINK_HERE",
-    "Anoushka": "YOUR_LINK_HERE",
+    "Anoushka": "https://youtu.be/gH8ZwvmjCAE",
     "Alicia": "YOUR_LINK_HERE",
     "Manav T": "YOUR_LINK_HERE",
     "Selina": "YOUR_LINK_HERE",
