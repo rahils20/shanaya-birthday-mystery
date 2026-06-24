@@ -35,7 +35,7 @@ VIDEO_LINKS = {
     "Miloni": "https://youtu.be/lwiMKsqemg4",
     "Rahil Patel": "https://youtu.be/ISOpeP2Oc2Y",
     "Shlok patel": "YOUR_LINK_HERE",
-    "Sahil": "YOUR_LINK_HERE",
+    "Sahil": "https://youtube.com/shorts/bMzjf1EcNu4",
     "Dua": "YOUR_LINK_HERE",
     "Rhea": "YOUR_LINK_HERE",
     "Ryan": "YOUR_LINK_HERE",
