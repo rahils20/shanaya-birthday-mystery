@@ -26,7 +26,7 @@ VIDEO_LINKS = {
     "Kshitija": "YOUR_LINK_HERE",
     "Pareen": "YOUR_LINK_HERE",
     "Alisha": "https://youtube.com/shorts/xeYM_-xl7pE",
-    "Ishika": "YOUR_LINK_HERE",
+    "Ishika": "https://youtu.be/OTQnL4-mN4w",
     "Mandira": "YOUR_LINK_HERE",
     "Mom": "YOUR_LINK_HERE",
     "Dadu": "YOUR_LINK_HERE",
