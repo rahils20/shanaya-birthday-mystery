@@ -16,32 +16,26 @@ VIDEO_LINKS = {
     "Rahil": "https://youtu.be/Iy5IVA1YsZ0",
     "Maanav": "https://youtube.com/shorts/82v7Clu82zw",
     "Divya": "https://youtube.com/shorts/esov4ekN_U4",
-    "Sarthak": "YOUR_LINK_HERE",
     "Anoushka": "https://youtu.be/gH8ZwvmjCAE",
-    "Alicia": "YOUR_LINK_HERE",
-    "Manav T": "YOUR_LINK_HERE",
-    "Selina": "YOUR_LINK_HERE",
-    "Panthiv": "YOUR_LINK_HERE",
-    "Shlokk": "YOUR_LINK_HERE",
-    "Kshitija": "YOUR_LINK_HERE",
-    "Pareen": "YOUR_LINK_HERE",
+    "Manav T": "https://youtube.com/shorts/BNWa3urR7Mg",
+    "Selina": "https://youtu.be/lVrMwKIgIno",
+    "Panthiv": "https://youtube.com/shorts/nCGuCFt2Enc",
+    "Shlokk": "https://youtu.be/GGvGN_xT2Cc",
+    "Kshitija": "https://youtu.be/xItmHrKGy58",
+    "Pareen": "https://youtu.be/9j_SiPlCNYA",
     "Alisha": "https://youtube.com/shorts/xeYM_-xl7pE",
     "Ishika": "https://youtu.be/OTQnL4-mN4w",
-    "Mandira": "YOUR_LINK_HERE",
-    "Mom": "YOUR_LINK_HERE",
-    "Dadu": "YOUR_LINK_HERE",
-    "Dad": "YOUR_LINK_HERE",
+    "Mandira": "https://youtu.be/HGH41tJfEKs",
+    "Mom": "https://youtu.be/eJmeRFUMY4s",
+    "Dadu": "https://youtu.be/BYVapyQAR0c",
+    "Dad": "https://youtube.com/shorts/QkHpilw4rY0",
     "Suchi": "YOUR_LINK_HERE",
     "Miloni": "https://youtu.be/lwiMKsqemg4",
     "Rahil Patel": "https://youtu.be/ISOpeP2Oc2Y",
     "Shlok patel": "YOUR_LINK_HERE",
     "Sahil": "https://youtube.com/shorts/bMzjf1EcNu4",
-    "Dua": "YOUR_LINK_HERE",
-    "Rhea": "YOUR_LINK_HERE",
     "Ryan": "YOUR_LINK_HERE",
-    "Shranay": "YOUR_LINK_HERE",
     "Aashna": "YOUR_LINK_HERE",
-    "Naomi": "YOUR_LINK_HERE",
     "Sharvil": "https://youtube.com/shorts/YsFrWMuOnyw"
 }
 
@@ -89,9 +83,7 @@ npcs_data = [
     {"name": "Rahil", "clue": "Hey babe! I locked the CCTV computer in the Lounge to keep the footage safe. Some of the items I have been using store some secret information. Find the 3 numbers to unlock it!"},
     {"name": "Maanav", "clue": "Happy Birthday! Honestly, I hit a massive tempo sprint session today and my macros are completely depleted. I'd kill for some carbs right now."},
     {"name": "Divya", "clue": "I was in the Library at 11:30 PM. The heavy brass candlestick was on the desk. By 12:15 AM, it was missing!"},
-    {"name": "Sarthak", "clue": "I've been playing pickleball outside since 11 PM. Nobody came into the West Garden with a cake, so the crime definitely happened indoors."},
     {"name": "Anoushka", "clue": "I was grabbing a drink near the Dining Room right around midnight. I heard a loud crash coming from the Kitchen. And I saw wet footprints!"},
-    {"name": "Alicia", "clue": "Did you see the Dining Room table? There are empty boxes of Sushi. The delivery guy left a weird note: 'Subtract the number of sushi boxes (3) from the delivery hour (23:00).'"},
     {"name": "Manav T", "clue": "I saw someone sprinting away from the West Wing in the dark. I couldn't see their face, but the screen on their Whoop strap was glowing."},
     {"name": "Selina", "clue": "A Whoop strap? That's interesting. Maanav and Shlokk are the only ones here obsessed with tracking their recovery on their Whoops."},
     {"name": "Panthiv", "clue": "Pool party is where it's at! Me and Shlokk have been in the water since 10 PM. He hasn't left the pool deck."},
@@ -109,13 +101,9 @@ npcs_data = [
     {"name": "Rahil Patel", "clue": "Great party! The food is amazing. Happy Birthday!"},
     {"name": "Shlok patel", "clue": "Are we playing pickleball later? Happy Birthday Shanaya!"},
     {"name": "Sahil", "clue": "I'm just here for the free drinks. Happy B-Day!"},
-    {"name": "Dua", "clue": "Did someone say there was cake? I wanted a piece! Happy Birthday!"},
-    {"name": "Rhea", "clue": "Happy Birthday Shanaya! Can we go swimming now?"},
     {"name": "Ryan", "clue": "Happy Birthday! I've literally just been wandering around looking for the bathroom."},
-    {"name": "Shranay", "clue": "Best birthday party ever. I'm having a blast."},
     {"name": "Aashna", "clue": "This house is huge! I keep getting lost looking for the pool. Happy Birthday Shanaya!"},
-    {"name": "Naomi", "clue": "The music is so good tonight! We need to get everyone on the dance floor. Happy Birthday!"},
-    {"name": "Sharvil", "clue": "Hey Shanaya, Happy Birthday! Let me know when we're cutting the cake, I'm starving."}
+    {"name": "Sharvil", "clue": "Did you see the Dining Room table? There are empty boxes of Sushi. The delivery guy left a weird note: 'Subtract the number of sushi boxes (3) from the delivery hour (23:00).'"}
 ]
 
 # Map the links from the dictionary at the top to the characters using the auto-fixer
@@ -210,7 +198,7 @@ game_html = f"""
     
     const interrogatedGuests = new Set();
     const allNamesList = {all_names_json};
-    const TOTAL_GUESTS = 30;
+    const TOTAL_GUESTS = 24;
 
     const rawNpcs = {json.dumps(npcs_data)};
     const npcs = [];
