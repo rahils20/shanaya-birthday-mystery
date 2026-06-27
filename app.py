@@ -160,7 +160,7 @@ game_html = f"""
 
 <div id="game-container">
     <canvas id="gameCanvas" width="1000" height="680"></canvas>
-    <div id="progress-tracker">Guests Interrogated: <span id="guest-count">0</span>/30</div>
+    <div id="progress-tracker">Guests Interrogated: <span id="guest-count">0</span>/25</div>
     
     <div id="dialogue-box">
         <h2 id="modal-title">Name</h2>
