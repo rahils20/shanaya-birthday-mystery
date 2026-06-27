@@ -104,7 +104,7 @@ npcs_data = [
     {"name": "Sahil", "clue": "I'm just here for the free drinks. Happy B-Day!"},
     {"name": "Ryan", "clue": "Happy Birthday! I've literally just been wandering around looking for the bathroom."},
     {"name": "Aashna", "clue": "This house is huge! I keep getting lost looking for the pool. Happy Birthday Shanaya!"},
-    {"name": "Sharvil", "clue": "Did you see the Dining Room table? There are empty boxes of Sushi. The delivery guy left a weird note: 'Subtract the number of sushi boxes (3) from the delivery hour (23:00).'"}
+    {"name": "Sharvil", "clue": "Did you see the Dining Room table? There are empty boxes of Sushi. The delivery guy left a weird note: 'Subtract the number of sushi boxes (3) from the delivery hour (23:00).'"},
     {"name": "Jai Kedia", "clue": "Can we play Mafia now?'"}
 ]
 
