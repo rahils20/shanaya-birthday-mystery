@@ -14,6 +14,7 @@ st.set_page_config(page_title="Shanaya's Birthday Mystery", layout="wide")
 
 VIDEO_LINKS = {
     "Rahil": "https://youtu.be/Iy5IVA1YsZ0",
+    "CCTV": "PUT_YOUR_CCTV_YOUTUBE_LINK_HERE",
     "Maanav": "https://youtube.com/shorts/82v7Clu82zw",
     "Divya": "https://youtube.com/shorts/esov4ekN_U4",
     "Anoushka": "https://youtu.be/gH8ZwvmjCAE",
@@ -571,7 +572,7 @@ game_html = f"""
             document.getElementById("modal-text").innerText = "The camera feed is heavily glitched, but you pull a 5-second clip from exactly 11:58 PM. You cannot see the culprit's face. However, you clearly see them carrying a heavy brass CANDLESTICK from the Library. As they pry open the cake box in the KITCHEN, a glowing WHOOP strap illuminates their wrist. They grab a slice of the Paleo Bakes cake and sprint out!";
             
             // This pulls Rahil's video from the links dictionary to act as the "CCTV footage" reveal
-            let cctv_link = "{fix_youtube_link(VIDEO_LINKS.get('Rahil', ''))}"; 
+            let cctv_link = "{fix_youtube_link(VIDEO_LINKS.get('CCTV', ''))}"; 
             
             document.getElementById("video-container").innerHTML = `<iframe width="100%" height="280" src="${{cctv_link}}?autoplay=1" frameborder="0"></iframe>`;
             document.getElementById("dialogue-box").style.display = "block";
