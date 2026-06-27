@@ -14,7 +14,7 @@ st.set_page_config(page_title="Shanaya's Birthday Mystery", layout="wide")
 
 VIDEO_LINKS = {
     "Rahil": "https://youtu.be/Iy5IVA1YsZ0",
-    "CCTV": "PUT_YOUR_CCTV_YOUTUBE_LINK_HERE",
+    "CCTV": "https://youtube.com/shorts/GxdqpSUJ6-Y",
     "Maanav": "https://youtube.com/shorts/82v7Clu82zw",
     "Divya": "https://youtube.com/shorts/esov4ekN_U4",
     "Anoushka": "https://youtu.be/gH8ZwvmjCAE",
