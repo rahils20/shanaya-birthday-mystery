@@ -29,14 +29,15 @@ VIDEO_LINKS = {
     "Mom": "https://youtu.be/eJmeRFUMY4s",
     "Dadu": "https://youtu.be/BYVapyQAR0c",
     "Dad": "https://youtube.com/shorts/QkHpilw4rY0",
-    "Suchi": "YOUR_LINK_HERE",
+    "Suchi": "https://youtube.com/shorts/npfQppAsh0I?feature=share",
     "Miloni": "https://youtu.be/lwiMKsqemg4",
     "Rahil Patel": "https://youtu.be/ISOpeP2Oc2Y",
-    "Shlok patel": "YOUR_LINK_HERE",
+    "Shlok patel": "https://youtu.be/IrKXd_F5unQ",
     "Sahil": "https://youtube.com/shorts/bMzjf1EcNu4",
-    "Ryan": "YOUR_LINK_HERE",
-    "Aashna": "YOUR_LINK_HERE",
-    "Sharvil": "https://youtube.com/shorts/YsFrWMuOnyw"
+    "Ryan": "https://youtu.be/6G3ye1aCYgA",
+    "Aashna": "https://youtu.be/YQ4-MfeSOXI",
+    "Sharvil": "https://youtube.com/shorts/YsFrWMuOnyw",
+    "Jai Kedia": "https://youtube.com/shorts/Psel2DKnMns?feature=share"
 }
 
 # --- YOUTUBE URL AUTO-CONVERTER ---
@@ -104,6 +105,7 @@ npcs_data = [
     {"name": "Ryan", "clue": "Happy Birthday! I've literally just been wandering around looking for the bathroom."},
     {"name": "Aashna", "clue": "This house is huge! I keep getting lost looking for the pool. Happy Birthday Shanaya!"},
     {"name": "Sharvil", "clue": "Did you see the Dining Room table? There are empty boxes of Sushi. The delivery guy left a weird note: 'Subtract the number of sushi boxes (3) from the delivery hour (23:00).'"}
+    {"name": "Jai Kedia", "clue": "Can we play Mafia now?'"}
 ]
 
 # Map the links from the dictionary at the top to the characters using the auto-fixer
@@ -198,7 +200,7 @@ game_html = f"""
     
     const interrogatedGuests = new Set();
     const allNamesList = {all_names_json};
-    const TOTAL_GUESTS = 24;
+    const TOTAL_GUESTS = 25;
 
     const rawNpcs = {json.dumps(npcs_data)};
     const npcs = [];
