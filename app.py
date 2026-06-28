@@ -38,7 +38,7 @@ VIDEO_LINKS = {
     "Ryan": "https://youtu.be/6G3ye1aCYgA",
     "Aashna": "https://youtu.be/YQ4-MfeSOXI",
     "Sharvil": "https://youtube.com/shorts/YsFrWMuOnyw",
-    "Dua": "https://youtube.com/shorts/YsFrWMuOnyw",
+    "Dua": "https://youtube.com/shorts/LpQZlpSj3UI",
     "Jai Kedia": "https://youtube.com/shorts/Psel2DKnMns?feature=share"
 }
 
