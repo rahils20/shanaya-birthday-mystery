@@ -38,6 +38,7 @@ VIDEO_LINKS = {
     "Ryan": "https://youtu.be/6G3ye1aCYgA",
     "Aashna": "https://youtu.be/YQ4-MfeSOXI",
     "Sharvil": "https://youtube.com/shorts/YsFrWMuOnyw",
+    "Dua": "https://youtube.com/shorts/YsFrWMuOnyw",
     "Jai Kedia": "https://youtube.com/shorts/Psel2DKnMns?feature=share"
 }
 
@@ -105,7 +106,8 @@ npcs_data = [
     {"name": "Sahil", "clue": "I'm just here for the free drinks. Happy B-Day!"},
     {"name": "Ryan", "clue": "Happy Birthday! I've literally just been wandering around looking for the bathroom."},
     {"name": "Aashna", "clue": "This house is huge! I keep getting lost looking for the pool. Happy Birthday Shanaya!"},
-    {"name": "Sharvil", "clue": "Did you see the Dining Room table? There are empty boxes of Sushi. The delivery guy left a weird note: 'Subtract the number of sushi boxes (3) from the delivery hour (23:00).'"},
+    {"name": "Sharvil", "clue": "Tequilla?"},
+    {"name": "Dua", "clue": "Did you see the Dining Room table? There are empty boxes of Sushi. The delivery guy left a weird note: 'Subtract the number of sushi boxes (3) from the delivery hour (23:00).'"},
     {"name": "Jai Kedia", "clue": "Can we play Mafia now?'"}
 ]
 
@@ -161,7 +163,7 @@ game_html = f"""
 
 <div id="game-container">
     <canvas id="gameCanvas" width="1000" height="680"></canvas>
-    <div id="progress-tracker">Guests Interrogated: <span id="guest-count">0</span>/25</div>
+    <div id="progress-tracker">Guests Interrogated: <span id="guest-count">0</span>/26</div>
     
     <div id="dialogue-box">
         <h2 id="modal-title">Name</h2>
@@ -201,7 +203,7 @@ game_html = f"""
     
     const interrogatedGuests = new Set();
     const allNamesList = {all_names_json};
-    const TOTAL_GUESTS = 25;
+    const TOTAL_GUESTS = 26;
 
     const rawNpcs = {json.dumps(npcs_data)};
     const npcs = [];
