@@ -643,7 +643,6 @@ with col3: guess_weapon = st.selectbox("Weapon", ["Select", "Candlestick", "Pois
 if st.button("MAKE ACCUSATION", use_container_width=True, type="primary"):
     if guess_who == "Maanav" and guess_where == "Kitchen" and guess_weapon == "Candlestick":
         st.success("🎉 CORRECT! You cracked the case, Shanaya! Happy Birthday! 🎂")
-        st.markdown("### 🎁 YOUR SURPRISE GIFT VOUCHER: `HAPPY-B-DAY-SHANAYA-100`")
         st.balloons()
     else:
         st.error("Not quite! Keep exploring the mansion, check your Detective Pad, or check the CCTV footage on the Lounge computer.")
